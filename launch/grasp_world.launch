@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Load world map retail store (krr store) -->
+  <include file="$(find retail_store_simulation)/launch/simulation.launch">
+    <arg name="rviz" value="true" />
+    <arg name="world" value="thesis_stan" />
+    <arg name="use_moveit_camera" value="false"/>
+  </include>
+
+  <!-- Configure settings file. -->
+  <arg name="knowrob_settings" default="$(find knowrob)/settings/default.pl" />
+  <env name="KNOWROB_SETTINGS" value="$(arg knowrob_settings)" />
+  <param name="mongodb_uri" value="$(optenv KNOWROB_MONGODB_URI mongodb://localhost:27017/?appname=knowrob)" />
+  
+  <!-- Prolog dependencies -->
+  <arg name="initial_package" default="grasp_generator" />
+  <arg name="initial_goal" default="true" />
+  <arg name="num_pl_threads" default="2" />
+  <arg name="num_ros_threads" default="4" />
+  
+  <param name="initial_package" type="string" value="$(arg initial_package)" />
+  <param name="initial_goal" type="string" value="$(arg initial_goal)" />
+  <param name="num_pl_threads" type="int" value="$(arg num_pl_threads)" />
+  <param name="num_ros_threads" type="int" value="$(arg num_ros_threads)" />
+  
+  <node name="rosprolog" pkg="rosprolog" type="rosprolog_node" cwd="node" output="screen" />
+  <node name="json_wrapper" pkg="rosprolog" type="json_ros.py" output="screen"/> 
+
+  <!-- grasp NN server initialization -->
+  <node name="detect_grasps" pkg="grasp_generator" type="detect_server" output="screen">
+    <param name="cloud_type" value="0" /> <!-- 0: PointCloud2, 1: CloudIndexed, 2: CloudSamples -->
+    <param name="cloud_topic" value="/xtion/depth_registered/points" />
+    <param name="samples_topic" value="" />
+    <param name="config_file" value="/home/stanz/gpd_experiment/gpd/cfg/ros_eigen_params.cfg" />
+    <param name="rviz_topic" value="plot_grasps" />
+  </node>
+
+  <!-- servers for performing the pipeline -->
+  <node name="look_to_point" pkg="look_to_point" type="look_to_point" respawn="true" cwd="node" output="screen" />
+  <node name="aruco_server" pkg="grasp_generator" type="aruco_server.py" cwd="node" output="screen" />
+  <node name="multiquadric_server" pkg="grasp_generator" type="multiquadric_server.py" cwd="node" output="screen" />
+  <node name="grasp_server" pkg="grasp_generator" type="grasp_server.py" cwd="node" output="screen" />
+
+
+  <!-- linkage aruco marker to product types -->
+  <rosparam file="$(find grasp_generator)/config/products.yaml" />
+
+</launch>
+
+
+

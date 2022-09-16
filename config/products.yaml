@@ -1,0 +1,71 @@
+products:
+  mug:
+    id: 9 
+    size:
+      x: 0.050
+      y: 0.070
+      z: 0.080
+    dist_to_center:
+      x: 0.000
+      y: 0.000
+      z: -0.030
+  hansaplast:
+    id: 20
+    size:
+      x: 0.080
+      y: 0.150
+      z: 0.050
+    dist_to_center:
+      x: 0.000
+      y: 0.000
+      z: -0.025
+  wineglass:
+    id: 15
+    size:
+      x: 0.070
+      y: 0.070
+      z: 0.170
+    dist_to_center:
+      x: 0.000
+      y: 0.000
+      z: -0.085
+  soda:
+    id: 14
+    size:
+      x: 0.065
+      y: 0.065
+      z: 0.120
+    dist_to_center:
+      x: 0.000
+      y: 0.000
+      z: -0.0600
+  milkbox:
+    id: 444
+    size:
+      x: 0.050
+      y: 0.050
+      z: 0.100
+    dist_to_center:
+      x: 0.000
+      y: 0.000
+      z: -0.050
+  box:
+    id: 333
+    size:
+      x: 0.050
+      y: 0.050
+      z: 0.100
+    dist_to_center:
+      x: 0.000
+      y: 0.000
+      z: -0.050
+  hammer:
+    id: 8
+    size:
+      x: 0.110
+      y: 0.225
+      z: 0.050
+    dist_to_center:
+      x: 0.000
+      y: -0.100
+      z: -0.025

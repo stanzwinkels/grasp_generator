@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Configure settings file. -->
+  <arg name="knowrob_settings" default="$(find knowrob)/settings/default.pl" />
+  <env name="KNOWROB_SETTINGS" value="$(arg knowrob_settings)" />
+  <param name="mongodb_uri" value="$(optenv KNOWROB_MONGODB_URI mongodb://localhost:27017/?appname=knowrob)" />
+
+  <!-- Prolog dependencies -->
+  <arg name="initial_package" default="grasp_generator" />
+  <arg name="initial_goal" default="true" />
+  <arg name="num_pl_threads" default="2" />
+  <arg name="num_ros_threads" default="4" />
+  
+  <param name="initial_package" type="string" value="$(arg initial_package)" />
+  <param name="initial_goal" type="string" value="$(arg initial_goal)" />
+  <param name="num_pl_threads" type="int" value="$(arg num_pl_threads)" />
+  <param name="num_ros_threads" type="int" value="$(arg num_ros_threads)" />
+  
+  <node name="rosprolog" pkg="rosprolog" type="rosprolog_node" cwd="node" output="screen" />
+  <node name="json_wrapper" pkg="rosprolog" type="json_ros.py" output="screen"/> 
+
+  <!-- Product initial parameters -->
+  <rosparam file="$(find grasp_generator)/config/products.yaml" />
+
+</launch>
+
+
+

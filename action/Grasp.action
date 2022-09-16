@@ -1,0 +1,8 @@
+# goal
+geometry_msgs/Pose pose
+---
+# Result
+bool success
+---
+# Feedback
+bool running

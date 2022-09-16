@@ -1,0 +1,692 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://www.semanticweb.org/stanz/primitive-ontol##"
+     xml:base="http://www.semanticweb.org/stanz/primitive-ontol#"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:DUL="http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:SOMA="http://www.ease-crc.org/ont/SOMA.owl#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:primitive-ontol="http://www.semanticweb.org/stanz/primitive-ontol#">
+    <owl:Ontology rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#GraspRegion -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#GraspRegion"/>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#hasComponent -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#hasComponent">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#hasShapePrimitive -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#hasShapePrimitive">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#hasTask -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#hasTask"/>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#isShapeOf -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#isShapeOf"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#hasArucoID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#hasArucoID"/>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#hasDiameter -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#hasDiameter">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasDimensions"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#hasDimensions -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#hasDimensions"/>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#hasHeight -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#hasHeight">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasDimensions"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#hasLength -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#hasLength">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasDimensions"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#hasOffset_X -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#hasOffset_X">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#hasOffset_Y -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#hasOffset_Y">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#hasOffset_Z -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#hasOffset_Z">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#hasWidth -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#hasWidth">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasDimensions"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Back -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Back">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Region"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Body -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Body">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#IndividualComponents"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasShapePrimitive"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Cube"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasShapePrimitive"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Cuboid"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasShapePrimitive"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Cylinder"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Bottom -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Bottom">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Region"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Cap -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Cap">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#IndividualComponents"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasShapePrimitive"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Cylinder"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasShapePrimitive"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Sphere"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Cone -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Cone">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#ShapePrimitives"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Cube -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Cube">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#ShapePrimitives"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Cuboid -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Cuboid">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#ShapePrimitives"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Cylinder -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Cylinder">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#ShapePrimitives"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Dopper -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Dopper">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Product"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasComponent"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Body"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasComponent"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Cap"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Front -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Front">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Region"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Hammer -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Hammer">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Product"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#HandOver -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#HandOver">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Task"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#GraspRegion"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Back"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#GraspRegion"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Front"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#GraspRegion"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Left"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#GraspRegion"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Right"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#GraspRegion"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Top"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasComponent"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Cap"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <owl:disjointWith rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Handle"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Handle -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Handle">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#IndividualComponents"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasShapePrimitive"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Cylinder"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#IndividualComponents -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#IndividualComponents"/>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Left -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Left">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Region"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Limonade -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Limonade">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Product"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasComponent"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Body"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasComponent"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Cap"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasTask"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#HandOver"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasTask"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Pour"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#MassageGun -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#MassageGun">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Product"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Mug -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Mug">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Product"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Octahedron -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Octahedron">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#ShapePrimitives"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Pour -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Pour">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Task"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#GraspRegion"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Back"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#GraspRegion"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Front"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#GraspRegion"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Left"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#GraspRegion"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Right"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasComponent"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Body"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasComponent"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Handle"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Product -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Product"/>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Region -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Region"/>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Right -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Right">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Region"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#ShapePrimitives -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#ShapePrimitives"/>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Sphere -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Sphere">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#ShapePrimitives"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#StoreInBin -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#StoreInBin">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Task"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#GraspRegion"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Top"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#StoreInShelf -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#StoreInShelf">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Task"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#GraspRegion"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Back"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#GraspRegion"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Front"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#GraspRegion"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Left"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#GraspRegion"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Right"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Task -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Task"/>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#ToolUse -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#ToolUse">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Task"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#hasComponent"/>
+                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Handle"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Top -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Top">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/primitive-ontol#Region"/>
+    </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Hagelslag1 -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Hagelslag1">
+        <primitive-ontol:hasArucoID rdf:datatype="http://www.w3.org/2001/XMLSchema#int">10</primitive-ontol:hasArucoID>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Hammer1 -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Hammer1">
+        <primitive-ontol:hasArucoID rdf:datatype="http://www.w3.org/2001/XMLSchema#int">8</primitive-ontol:hasArucoID>
+        <primitive-ontol:hasHeight rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.05</primitive-ontol:hasHeight>
+        <primitive-ontol:hasLength rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.11</primitive-ontol:hasLength>
+        <primitive-ontol:hasOffset_X rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.0</primitive-ontol:hasOffset_X>
+        <primitive-ontol:hasOffset_Y rdf:datatype="http://www.w3.org/2001/XMLSchema#float">-0.1</primitive-ontol:hasOffset_Y>
+        <primitive-ontol:hasOffset_Z rdf:datatype="http://www.w3.org/2001/XMLSchema#float">-0.025</primitive-ontol:hasOffset_Z>
+        <primitive-ontol:hasWidth rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.225</primitive-ontol:hasWidth>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Hansaplast1 -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Hansaplast1">
+        <primitive-ontol:hasArucoID rdf:datatype="http://www.w3.org/2001/XMLSchema#int">20</primitive-ontol:hasArucoID>
+        <primitive-ontol:hasHeight rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.05</primitive-ontol:hasHeight>
+        <primitive-ontol:hasLength rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.15</primitive-ontol:hasLength>
+        <primitive-ontol:hasOffset_X rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.0</primitive-ontol:hasOffset_X>
+        <primitive-ontol:hasOffset_Y rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.0</primitive-ontol:hasOffset_Y>
+        <primitive-ontol:hasOffset_Z rdf:datatype="http://www.w3.org/2001/XMLSchema#float">-0.025</primitive-ontol:hasOffset_Z>
+        <primitive-ontol:hasWidth rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.08</primitive-ontol:hasWidth>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Mug1 -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Mug1">
+        <primitive-ontol:hasArucoID rdf:datatype="http://www.w3.org/2001/XMLSchema#int">9</primitive-ontol:hasArucoID>
+        <primitive-ontol:hasHeight rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.08</primitive-ontol:hasHeight>
+        <primitive-ontol:hasLength rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.05</primitive-ontol:hasLength>
+        <primitive-ontol:hasOffset_X rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.0</primitive-ontol:hasOffset_X>
+        <primitive-ontol:hasOffset_Y rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.0</primitive-ontol:hasOffset_Y>
+        <primitive-ontol:hasOffset_Z rdf:datatype="http://www.w3.org/2001/XMLSchema#float">-0.03</primitive-ontol:hasOffset_Z>
+        <primitive-ontol:hasWidth rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.07</primitive-ontol:hasWidth>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#Wineglass1 -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#Wineglass1">
+        <primitive-ontol:hasArucoID rdf:datatype="http://www.w3.org/2001/XMLSchema#int">15</primitive-ontol:hasArucoID>
+        <primitive-ontol:hasHeight rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.17</primitive-ontol:hasHeight>
+        <primitive-ontol:hasLength rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.07</primitive-ontol:hasLength>
+        <primitive-ontol:hasOffset_X rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.0</primitive-ontol:hasOffset_X>
+        <primitive-ontol:hasOffset_Y rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.0</primitive-ontol:hasOffset_Y>
+        <primitive-ontol:hasOffset_Z rdf:datatype="http://www.w3.org/2001/XMLSchema#float">-0.085</primitive-ontol:hasOffset_Z>
+        <primitive-ontol:hasWidth rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.07</primitive-ontol:hasWidth>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#cola1 -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#cola1">
+        <primitive-ontol:hasArucoID rdf:datatype="http://www.w3.org/2001/XMLSchema#int">333</primitive-ontol:hasArucoID>
+        <primitive-ontol:hasHeight rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.1</primitive-ontol:hasHeight>
+        <primitive-ontol:hasLength rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.05</primitive-ontol:hasLength>
+        <primitive-ontol:hasOffset_X rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.0</primitive-ontol:hasOffset_X>
+        <primitive-ontol:hasOffset_Y rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.0</primitive-ontol:hasOffset_Y>
+        <primitive-ontol:hasOffset_Z rdf:datatype="http://www.w3.org/2001/XMLSchema#float">-0.05</primitive-ontol:hasOffset_Z>
+        <primitive-ontol:hasWidth rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.05</primitive-ontol:hasWidth>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#cola2 -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#cola2">
+        <primitive-ontol:hasArucoID rdf:datatype="http://www.w3.org/2001/XMLSchema#int">14</primitive-ontol:hasArucoID>
+        <primitive-ontol:hasHeight rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.12</primitive-ontol:hasHeight>
+        <primitive-ontol:hasLength rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.065</primitive-ontol:hasLength>
+        <primitive-ontol:hasOffset_X rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.0</primitive-ontol:hasOffset_X>
+        <primitive-ontol:hasOffset_Y rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.0</primitive-ontol:hasOffset_Y>
+        <primitive-ontol:hasOffset_Z rdf:datatype="http://www.w3.org/2001/XMLSchema#float">-0.06</primitive-ontol:hasOffset_Z>
+        <primitive-ontol:hasWidth rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.065</primitive-ontol:hasWidth>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#pasta1 -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#pasta1">
+        <primitive-ontol:hasArucoID rdf:datatype="http://www.w3.org/2001/XMLSchema#int">444</primitive-ontol:hasArucoID>
+        <primitive-ontol:hasHeight rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.1</primitive-ontol:hasHeight>
+        <primitive-ontol:hasLength rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.05</primitive-ontol:hasLength>
+        <primitive-ontol:hasOffset_X rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.0</primitive-ontol:hasOffset_X>
+        <primitive-ontol:hasOffset_Y rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.0</primitive-ontol:hasOffset_Y>
+        <primitive-ontol:hasOffset_Z rdf:datatype="http://www.w3.org/2001/XMLSchema#float">-0.05</primitive-ontol:hasOffset_Z>
+        <primitive-ontol:hasWidth rdf:datatype="http://www.w3.org/2001/XMLSchema#float">0.05</primitive-ontol:hasWidth>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/stanz/primitive-ontol#pasta2 -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/stanz/primitive-ontol#pasta2">
+        <primitive-ontol:hasHeight rdf:datatype="http://www.w3.org/2001/XMLSchema#float">10.0</primitive-ontol:hasHeight>
+        <primitive-ontol:hasLength rdf:datatype="http://www.w3.org/2001/XMLSchema#float">12.0</primitive-ontol:hasLength>
+        <primitive-ontol:hasWidth rdf:datatype="http://www.w3.org/2001/XMLSchema#float">13.0</primitive-ontol:hasWidth>
+    </owl:NamedIndividual>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi -->
+
