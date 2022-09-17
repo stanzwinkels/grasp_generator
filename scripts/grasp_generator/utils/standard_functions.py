@@ -1,5 +1,9 @@
+# ros
+import rospy
+import tf2_ros
+import tf2_geometry_msgs
+
 # utilities
-from functools import partial
 import numpy as np
 import open3d as o3d
 import time
@@ -81,3 +85,35 @@ def quaternion_rotation_matrix(pose):
     rotation_matrix[0:3,2] = grasp_axis
     quat = quaternion_from_matrix(rotation_matrix)
     return quat
+
+def transform_pose(pose, from_frame, to_frame):
+    """
+    Function to transform coordinates one frame to another frame 
+
+    Parameters
+    ----------
+    position    : message, 
+        Position of object to be translated in the correct frame.
+    orientation : message
+        Orientation of object to be rotate in the correct frame.
+    from_frame  : str, source_frame
+    to_frame    : str, resulting_Frame
+
+    Return
+    ---------
+    output_pose_stamped.pose : message
+        Object coordinates in the new reference frame.
+    """
+    
+    tf_buffer = tf2_ros.Buffer()
+    listener = tf2_ros.TransformListener(tf_buffer)
+
+    start_pose = PoseStamped()
+    start_pose.pose = pose
+    start_pose.header.frame_id = from_frame
+    start_pose.header.stamp = rospy.Time(0)
+
+    output_pose_stamped = tf_buffer.transform(start_pose, to_frame, rospy.Duration(2))    
+    return output_pose_stamped.pose
+
+

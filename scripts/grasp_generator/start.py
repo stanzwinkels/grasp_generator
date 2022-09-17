@@ -3,6 +3,7 @@
 # Ros
 from fileinput import close
 from functools import partial
+from turtle import pd
 import rospy
 
 # Clients
@@ -12,13 +13,14 @@ from grasp_generator.server_clients.aruco_client import ArucoClient
 from grasp_generator.server_clients.multiquadric_client import MultiquadricClient
 
 # Utils
-from grasp_generator.utils.utils_aruco_marker import detect_aruco_marker
+from grasp_generator.utils.utils_aruco_marker import detect_aruco_marker, convert_aruco_center, match_mult_aruco
 from grasp_generator.utils.point_cloud_filtering import point_cloud_filter
 from grasp_generator.utils.standard_functions import (
     point_cloud_to_message,
     tiago_pose,
     save_pointcloud,
     load_pointcloud,
+    transform_pose,
 )
 from grasp_generator.utils.superquadric_functions import (
     grasp_quadric_distance,
@@ -34,7 +36,7 @@ import tkinter as tk
 import open3d as o3d
 from tkFileDialog import askopenfilename
 import rospkg
-
+import pdb
 # Messages
 from sensor_msgs.msg import PointCloud2
 
@@ -61,7 +63,7 @@ class Main:
         self.topic_pointcloud_tiago = "/xtion/depth_registered/points"
         self.topic_aruco_detection = "/aruco_marker_publisher/markers"
 
-        self.aruco_id = 14
+        self.aruco_id = 444
 
         self.task = "Pour"
         self.product = "Limonade"
@@ -73,10 +75,14 @@ class Main:
         # 1. Aruco pose generation
         aruco_poses = detect_aruco_marker(
             self._nr_products, self.topic_aruco_detection)  
-            
+        aruco_poses = convert_aruco_center(aruco_poses)    
+
         aruco_client = ArucoClient()  
-        aruco_client.run(
-            aruco_poses[self.aruco_id])  
+        aruco_client.run(aruco_poses[self.aruco_id])  
+
+        for i in aruco_poses:
+            aruco_poses[i].pose.pose = transform_pose(aruco_poses[i].pose.pose, "map", "xtion_rgb_optical_frame") 
+
 
         if self.load:
             partial_pointcloud = load_pointcloud(
@@ -88,11 +94,15 @@ class Main:
                 ) 
             grasp_poses = detect_grasp_client(pointcloud)
             partial_pointcloud = point_cloud_filter(pointcloud, self.debug)
+
+            grasp_list = match_mult_aruco(aruco_poses, grasp_poses, threshold_dist = 0.15)
+
             if self.save:
                 save_pointcloud(
                     partial_pointcloud,
                     self.product,
                     self.package_path + "/data/" + self.product + "/")
+        
 
         # 2. superquadric modelling
         pointcloud_msg = point_cloud_to_message(partial_pointcloud)
@@ -105,22 +115,26 @@ class Main:
         if self.superquadric_visualize:
             visualize_superquadric(partial_pointcloud, filt_superquadrics)
 
+
         # 3. prolog reasoning
         prolog_reasoning = PrologFunctionTask()
         request_ID = prolog_reasoning.shape_selection(
             filt_superquadrics, self.product, self.task)
         # request_ID = ast.literal_eval(request_ID[0])
 
-        # 4. primitive - grasp matching
-        closest_primitives, distances = grasp_quadric_distance(
-            filt_superquadrics, grasp_poses.grasps)
 
-        # 5. grasp performance
         if not self.load:
-            suitable_grasp_index = np.where(closest_primitives == request_ID)
-            grasp_pose = tiago_pose(grasp_poses.grasps[0])
+            # 4. primitive - grasp matching
+            closest_primitives, distances = grasp_quadric_distance(
+                filt_superquadrics, grasp_list)
+        
+            # 5. grasp performance
+            final_grasp = grasp_list[np.where(distances == min(distances[closest_primitives==1]))[0][0]]
+            grasp_pose = tiago_pose(final_grasp[1])
             grasp_client = GraspClient("right")
             result = grasp_client.run(grasp_pose)
+
+        print("end of task")
 
 
 if __name__ == "__main__":

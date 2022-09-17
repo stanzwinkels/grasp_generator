@@ -6,7 +6,7 @@ import trimesh
 from scipy.spatial.transform import Rotation as R
 
 
-
+import pdb
 
 def categorize_superquadric(superquadric):
     """
@@ -41,7 +41,9 @@ def grasp_quadric_distance(superquadrics, grasps):
     distances = np.zeros(len(grasps))
 
     for j in range(len(grasps)): 
-        grasp_point = [grasps[j].position.x, grasps[j].position.y, grasps[j].position.z]
+        grasp_point = [grasps[j][1].position.x, grasps[j][1].position.y, grasps[j][1].position.z]
+        
+
         for i in range(len(superquadrics)):
             eps = superquadrics[i][0:2]
             scale = superquadrics[i][2:5]
@@ -49,6 +51,7 @@ def grasp_quadric_distance(superquadrics, grasps):
             translation = superquadrics[i][9:12]
             q = R.from_quat(quaternion)
             rotation_matrix = q.as_dcm()
+
 
             new_grasp_point =  np.dot(np.linalg.inv(rotation_matrix), (grasp_point - translation))           
             distance = radial_euclidean_distance(new_grasp_point, scale, eps)
