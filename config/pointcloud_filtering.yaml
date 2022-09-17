@@ -1,0 +1,16 @@
+perception_area:
+  max_depth_threshold: 0.8
+  min_depth_threshold: 0.2
+  max_width_threshold: 0.6
+  min_width_threshold: -0.1
+  
+plane_segmentation:
+  distance_threshold: 0.03
+  ransac_n: 3
+  num_iterations: 1000
+ 
+mesh: 
+  voxel_size: 0.0017
+  alpha: 0.05
+  mesh_sampling_points: 5000
+  

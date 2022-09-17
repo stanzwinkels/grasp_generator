@@ -30,10 +30,11 @@ def point_cloud_filter(point_cloud_raw, debug):
     # 1. crop area perceived pointcloud
     lb = point_cloud.get_min_bound()
     ub = point_cloud.get_max_bound()
-    ub[-1] = 0.8
-    ub[0] = 0.2
-    ub[1] = 0.6
-    lb[0] = -0.1
+
+    ub[-1] = rospy.get_param('perception_area/max_depth_threshold')
+    ub[0] = rospy.get_param('perception_area/min_depth_threshold')
+    ub[1] =  rospy.get_param('perception_area/max_width_threshold')
+    lb[0] = rospy.get_param('perception_area/min_width_threshold')
 
     min_bound = lb
     max_bound = ub
@@ -45,22 +46,26 @@ def point_cloud_filter(point_cloud_raw, debug):
 
     # 2. remove table perceived pointcloud
     plane_model, inliers = point_cloud.segment_plane(
-        distance_threshold=0.03, ransac_n=3, num_iterations=1000
+        distance_threshold=rospy.get_param('plane_segmentation/distance_threshold'), 
+        ransac_n=rospy.get_param('plane_segmentation/ransac_n'), 
+        num_iterations=rospy.get_param('plane_segmentation/num_iterations')
     )
 
     point_cloud = point_cloud.select_down_sample(inliers, invert=True)
     if debug:
         o3d.visualization.draw_geometries([point_cloud])
 
-    # 3. reduce the number of points
-    object_cloud = point_cloud.voxel_down_sample(voxel_size=0.0017)
-    if debug:
-        o3d.visualization.draw_geometries([object_cloud])
 
     mesh = False
     if mesh: 
+        # 3. reduce the number of points
+        object_cloud = point_cloud.voxel_down_sample(
+            voxel_size=rospy.get_param('mesh/voxel_size'))
+        if debug:
+            o3d.visualization.draw_geometries([object_cloud])
+
         # 4. create mesh of the object pointcloud
-        alpha = 0.05
+        alpha = rospy.get_param('mesh/alpha')
         tetra_mesh, pt_map = o3d.geometry.TetraMesh.create_from_point_cloud(object_cloud)
         object_mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_alpha_shape(
             object_cloud, alpha, tetra_mesh, pt_map
@@ -70,7 +75,8 @@ def point_cloud_filter(point_cloud_raw, debug):
 
         # 5. Sample points from the mesh to create a new pointcloud
         object_mesh.compute_vertex_normals()
-        point_cloud = object_mesh.sample_points_uniformly(number_of_points=5000)
+        point_cloud = object_mesh.sample_points_uniformly(
+            number_of_points=rospy.get_param('mesh/mesh_sampling_points'))
         if debug:
             o3d.visualization.draw_geometries([point_cloud])
 
