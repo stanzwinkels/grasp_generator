@@ -1,5 +1,4 @@
 #!/usr/bin/env python3.6
-from re import X
 from grasp_generator.tools_superquadric.multi_superquadric_fixed_number import fixed_nr_ems
 
 # Libaries
@@ -8,20 +7,16 @@ import rospkg
 import open3d as o3d
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
-from itertools import combinations
+from itertools import combinations, product
 from math import sqrt
 import pdb
+import csv
+import time
+from scipy.optimize import linear_sum_assignment
 
 # Visualization
 from grasp_generator.visualization.visualization_superquadric import visualize_superquadric
-from sklearn.model_selection import RandomizedSearchCV
 
-import csv
-import time
-
-import matplotlib.pyplot as plt
-from scipy.spatial.distance import cdist
-from scipy.optimize import linear_sum_assignment
 
 
 def load_pointcloud(location):
@@ -75,8 +70,6 @@ def dist_difference(distance, superquadrics):
     return total_dist_difference, col_ind
 
 
-
-
 class Main:
     def __init__(self, load=True, superquadric_visualize=True):
         self.load = load
@@ -85,14 +78,13 @@ class Main:
         self.rospack = rospkg.RosPack()
         self.package_path = self.rospack.get_path("grasp_generator")
         self.product = "Limonade"
-        self.nr_superquadrics = 3
+        self.nr_superquadrics = 2
 
 
-        self.distance = [0.05, 0.3, 0.2]
+        self.distance = [0.05]
         self.size = np.array([
-                        [1.,2.,3.], 
-                        [3.5,2.1,1.1], 
-                        [3,2,3]
+                        [0.03, 0.03, 0.1], 
+                        [0.02, 0.02, 0.02]
                         ])
 
         self.OutlierRatio = [0.6,0.9]           # prior outlier probability [0, 1) (default: 0.1)
@@ -136,77 +128,72 @@ class Main:
         total_length = len(self.OutlierRatio)* len(self.MaxIterationEM)* len(self.Sigma)* len(self.Eps)* len(self.MinPoints)
         count = 1
 
-        for a in range(len(self.OutlierRatio)): 
-            for b in range(len(self.MaxIterationEM)):
-                for c in range(len(self.Sigma)):
-                    for d in range(len(self.Eps)):
-                        for e in range(len(self.MinPoints)):
 
-                            list_quadrics = fixed_nr_ems(
-                                partial_pointcloud, 
-                                OutlierRatio = self.OutlierRatio[a],             
-                                MaxIterationEM = self.MaxIterationEM[b],            
-                                ToleranceEM = self.ToleranceEM,            
-                                RelativeToleranceEM = self.RelativeToleranceEM,      
-                                MaxOptiIterations = self.MaxOptiIterations,          
-                                Sigma = self.Sigma[c],                    
-                                MaxiSwitch = self.MaxiSwitch,                 
-                                AdaptiveUpperBound = self.AdaptiveUpperBound,      
-                                Rescale = self.Rescale,                 
-                                MaxLayer = self.MaxLayer,                   
-                                Eps = self.Eps[d],                    
-                                MinPoints = self.MinPoints[e],               
-                                nr_superquadrics = self.nr_superquadrics)
+        for a, b, c, d, e in product(self.OutlierRatio, self.MaxIterationEM, self.Sigma, self.Eps, self.MinPoints ):
+            list_quadrics = fixed_nr_ems(
+                partial_pointcloud, 
+                OutlierRatio = self.OutlierRatio[a],             
+                MaxIterationEM = self.MaxIterationEM[b],            
+                ToleranceEM = self.ToleranceEM,            
+                RelativeToleranceEM = self.RelativeToleranceEM,      
+                MaxOptiIterations = self.MaxOptiIterations,          
+                Sigma = self.Sigma[c],                    
+                MaxiSwitch = self.MaxiSwitch,                 
+                AdaptiveUpperBound = self.AdaptiveUpperBound,      
+                Rescale = self.Rescale,                 
+                MaxLayer = self.MaxLayer,                   
+                Eps = self.Eps[d],                    
+                MinPoints = self.MinPoints[e],               
+                nr_superquadrics = self.nr_superquadrics)
 
-                            value_quadrics =[]
-                            for k in range(len(list_quadrics)):
-                                value_quadrics = np.concatenate(
-                                    (
-                                        value_quadrics,
-                                        list_quadrics[k]._shape,
-                                        list_quadrics[k]._scale,
-                                        list_quadrics[k].quat,
-                                        list_quadrics[k]._translation,
-                                    )
-                                )
-                            superquadrics = np.reshape(value_quadrics, (-1, 12))
+            value_quadrics =[]
+            for k in range(len(list_quadrics)):
+                value_quadrics = np.concatenate(
+                    (
+                        value_quadrics,
+                        list_quadrics[k]._shape,
+                        list_quadrics[k]._scale,
+                        list_quadrics[k].quat,
+                        list_quadrics[k]._translation,
+                    )
+                )
+            superquadrics = np.reshape(value_quadrics, (-1, 12))
 
 
-                            total_dist_difference, _ = dist_difference(self.distance, superquadrics)
-                            total_size_difference, _, col_ind = size_diff(self.size, superquadrics)
-                            total_score = total_size_difference + total_dist_difference
+            total_dist_difference, _ = dist_difference(self.distance, superquadrics)
+            total_size_difference, _, col_ind = size_diff(self.size, superquadrics)
+            total_score = total_size_difference + total_dist_difference
 
-                            print("   ***total distance difference", total_dist_difference)
-                            print("   ***total size difference", total_size_difference)
-                            print("   ***total error", total_score)
+            print("   ***total distance difference", total_dist_difference)
+            print("   ***total size difference", total_size_difference)
+            print("   ***total error", total_score)
 
-                            # for z in range(len(col_ind)):
-                            #     print("object: ", z, " is matched with quadric: " ,col_ind[z])
-                            # print("\n")
+            # for z in range(len(col_ind)):
+            #     print("object: ", z, " is matched with quadric: " ,col_ind[z])
+            # print("\n")
 
-                            mylist = [
-                                self.OutlierRatio[a],
-                                self.MaxIterationEM[b],
-                                self.ToleranceEM,
-                                self.RelativeToleranceEM,
-                                self.MaxOptiIterations,
-                                self.Sigma[c],
-                                self.MaxiSwitch,
-                                self.AdaptiveUpperBound,
-                                self.Rescale,
-                                self.MaxLayer,
-                                self.Eps[d],
-                                self.MinPoints[e],
-                                self.nr_superquadrics,
-                                total_dist_difference, 
-                                total_size_difference, 
-                                total_score]
+            mylist = [
+                self.OutlierRatio[a],
+                self.MaxIterationEM[b],
+                self.ToleranceEM,
+                self.RelativeToleranceEM,
+                self.MaxOptiIterations,
+                self.Sigma[c],
+                self.MaxiSwitch,
+                self.AdaptiveUpperBound,
+                self.Rescale,
+                self.MaxLayer,
+                self.Eps[d],
+                self.MinPoints[e],
+                self.nr_superquadrics,
+                total_dist_difference, 
+                total_size_difference, 
+                total_score]
 
-                            total_list.append(mylist)
+            total_list.append(mylist)
 
-
-                            print("Iteration ", count, "/", total_length)
-                            count += 1
+            print("Iteration ", count, "/", total_length)
+            count += 1
 
 
         t = time.localtime()
@@ -219,9 +206,6 @@ class Main:
 
 
         print("finished - uploaded data to ", self.package_path + "/parameter_tuning/parameters-" + timestamp + ".csv")
-
-
-
 
 
         # if self.superquadric_visualize:
