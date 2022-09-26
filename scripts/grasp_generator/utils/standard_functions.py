@@ -30,13 +30,14 @@ def save_pointcloud(pointcloud, product, location):
     if logask == 'y': 
         t = time.localtime()
         timestamp = time.strftime('%b-%d-%Y_%H%M%S', t)
-        product_name = product + "-" + timestamp + '.ply'
+        product_name = product + "-" + timestamp 
         pcd = o3d.geometry.PointCloud()
         pcd.points = o3d.utility.Vector3dVector(pointcloud)
-        o3d.io.write_point_cloud(location+product_name, pcd,  write_ascii=True, compressed=False, print_progress=True)
+        o3d.io.write_point_cloud(location+product_name + '.ply', pcd,  write_ascii=True, compressed=False, print_progress=True)
+        return product_name
     else: 
         print("not saving\n")
-
+    return 
 
 
 # converts pointcloud to a correct message

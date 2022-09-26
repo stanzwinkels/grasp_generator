@@ -1,11 +1,11 @@
 perception_area:
   max_depth_threshold: 0.8
   min_depth_threshold: 0.2
-  max_width_threshold: 0.6
-  min_width_threshold: -0.1
+  max_width_threshold: 1.0     # rightside: set lower for smaller field
+  min_width_threshold: -0.4    # left_side: set higher for smaller field
   
 plane_segmentation:
-  distance_threshold: 0.03
+  distance_threshold: 0.01
   ransac_n: 3
   num_iterations: 1000
  

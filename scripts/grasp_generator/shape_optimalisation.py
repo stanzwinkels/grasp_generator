@@ -1,40 +1,36 @@
 #!/usr/bin/env python3.6
-from grasp_generator.tools_superquadric.multi_superquadric_fixed_number import fixed_nr_ems
 
 # Libaries
+import yaml 
 import numpy as np
 import rospkg
 import open3d as o3d
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
-from itertools import combinations, product
-from math import sqrt
+from math import sqrt, tanh
 import pdb
-import csv
-import time
 from scipy.optimize import linear_sum_assignment
+import os
+import pickle
+import joblib
+import plotly
+import plotly.express as px
+
+# Superquadric generator
+from grasp_generator.tools_superquadric.multi_superquadric_fixed_number import fixed_nr_ems
+
 
 # Visualization
 from grasp_generator.visualization.visualization_superquadric import visualize_superquadric
 
+# Rotation
+from pyquaternion import Quaternion
 
 
-def load_pointcloud(location):
-    root = tk.Tk()
-    root.withdraw()
-    root.filename = askopenfilename(initialdir=location, title="Select file",
-                                            filetypes=[("Pointcloud", "*.ply")])
-    source = o3d.io.read_point_cloud(root.filename)
-    partial_pointcloud = np.asarray(source.points)
-    return partial_pointcloud
+import optuna
+from optuna.visualization import plot_optimization_history, plot_parallel_coordinate
 
-
-def dist(x_vals, y_vals, z_vals):
-  " Distance of pair combinations of x_vals & y_vals & z_vals (i.e. 1-2, 1-3, 2-3, etc.)"
-  dist2 = lambda z: sqrt((z[0][0] - z[1][0]) ** 2.0 + (z[0][1]- z[1][1]) ** 2.0 + (z[0][2]- z[1][2]) ** 2.0)
-  return list(map(dist2, combinations(zip(x_vals, y_vals, z_vals), 2)))
-
-    
+  
 def size_diff(size, superquadrics):
     sum_size_matrix = np.zeros([len(size), len(size)])
     n = len(size)
@@ -48,103 +44,53 @@ def size_diff(size, superquadrics):
             row_ind, col_ind = linear_sum_assignment(cost, maximize=True)
             select_matrix[i][j] = np.array(col_ind)
             sum_size_matrix[i][j] = cost[row_ind, col_ind].sum()
-            # for z in range(len(row_ind)):
-            #     print("row: ", row_ind[z], "  col: " ,col_ind[z], "  value: ", cost[z, col_ind[z]] )
-            # print("\n")
-
     row_ind, col_ind = linear_sum_assignment(sum_size_matrix, maximize=True)
     total_size_difference = sum_size_matrix[row_ind, col_ind].sum()
-
-    return total_size_difference, select_matrix[row_ind, col_ind], col_ind
+    total_size_diff_norm = tanh(np.abs(total_size_difference))
+    return total_size_diff_norm, select_matrix[row_ind, col_ind], col_ind
 
 
 def dist_difference(distance, superquadrics): 
-    distQ = dist(superquadrics[:,9], superquadrics[:,10], superquadrics[:,11])
-    cost = np.zeros([len(distance), len(distance)])
-    for i in range(len(distance)): 
-        for j in range(len(distQ)):
-            cost[i][j] = np.abs(distance[i] - distQ[j]) 
-    row_ind, col_ind = linear_sum_assignment(cost, maximize=True)
-    total_dist_difference = cost[row_ind, col_ind].sum()
+    distQ1 = np.array([superquadrics[:,9][0] - superquadrics[:,9][1], superquadrics[:,10][0] - superquadrics[:,10][1], superquadrics[:,11][0] - superquadrics[:,11][1]])
+    distQ2 = np.array([superquadrics[:,9][1] - superquadrics[:,9][0], superquadrics[:,10][1] - superquadrics[:,10][0], superquadrics[:,11][1] - superquadrics[:,11][0]])
+    min_difference = np.array([np.abs((distance - distQ1)).sum(), np.abs((distance - distQ2)).sum()]).min()
+    norm_min_difference = tanh(np.abs(min_difference))
+    return norm_min_difference
 
-    return total_dist_difference, col_ind
+def objective(trial, pointclouds, dimensions, distances):
+    OutlierRatio = trial.suggest_float('OutlierRatio', 0.0, 1.0)
+    MaxIterationEM = trial.suggest_int('MaxIterationEM', 10, 30, step=2)                # maximum number of EM iterations (default: 20)
+    ToleranceEM = trial.suggest_float('ToleranceEM', 0.0001, 0.01)                      # absolute tolerance of EM (default: 1e-3)
+    RelativeToleranceEM = trial.suggest_float('RelativeToleranceEM', 0.01, 1)           # relative tolerance of EM (default: 1e-1)
+    MaxOptiIterations = 2                                                               # maximum number of optimization iterations per M (default: 2)
+    Sigma = 0.3                                                                         # 0.3 initial sigma^2 (default: 0 - auto generate)
+    MaxiSwitch = trial.suggest_int("MaxiSwitch", 1, 4, step=1)                          # maximum number of switches allowed (default: 2)
+    AdaptiveUpperBound = trial.suggest_categorical("AdaptiveUpperBound", [True, False]) # Introduce adaptive upper bound to restrict the volume of SQ (default: false)
+    Rescale = True                                                                      # normalize the input point cloud (default: true)
+    MaxLayer = 3                                                                        # maximum depth
+    Eps = trial.suggest_float('Eps',0.001, 0.1)                                         # 0.03 IMPORTANT: varies based on the size of the input pointcoud (DBScan parameter)
+    MinPoints = trial.suggest_int('MinPoints', 50, 500, step=50),                       # DBScan parameter required minimum points
 
-
-class Main:
-    def __init__(self, load=True, superquadric_visualize=True):
-        self.load = load
-        self.superquadric_visualize = superquadric_visualize
-
-        self.rospack = rospkg.RosPack()
-        self.package_path = self.rospack.get_path("grasp_generator")
-        self.product = "Limonade"
-        self.nr_superquadrics = 2
-
-
-        self.distance = [0.05]
-        self.size = np.array([
-                        [0.03, 0.03, 0.1], 
-                        [0.02, 0.02, 0.02]
-                        ])
-
-        self.OutlierRatio = [0.6,0.9]           # prior outlier probability [0, 1) (default: 0.1)
-        self.MaxIterationEM = [15, 20]                # maximum number of EM iterations (default: 20)
-        self.ToleranceEM = 0.001                # absolute tolerance of EM (default: 1e-3)
-        self.RelativeToleranceEM = 0.1          # relative tolerance of EM (default: 1e-1)
-        self.MaxOptiIterations = 2              # maximum number of optimization iterations per M (default: 2)
-        self.Sigma = [0.3, 0.35]                        # 0.3 initial sigma^2 (default: 0 - auto generate)
-        self.MaxiSwitch = 1                     # maximum number of switches allowed (default: 2)
-        self.AdaptiveUpperBound = True          # Introduce adaptive upper bound to restrict the volume of SQ (default: false)
-        self.Rescale = True                     # normalize the input point cloud (default: true)
-        self.MaxLayer = 3                       # maximum depth
-        self.Eps = [0.35, 0.03]                         # 0.03 IMPORTANT: varies based on the size of the input pointcoud (DBScan parameter)
-        self.MinPoints = [200, 300]                    # DBScan parameter required minimum points
-
-
-    def run(self):
-        if self.load:
-            partial_pointcloud = load_pointcloud(
-                self.package_path + "/data/" + self.product)
-
-        headerList = [
-            'OutlierRatio',
-            'MaxIterationEM',
-            'ToleranceEM',
-            'RelativeToleranceEM',
-            'MaxOptiIterations',
-            'Sigma',
-            'MaxiSwitch',
-            'AdaptiveUpperBound',
-            'Rescale',
-            'MaxLayer',
-            'Eps',
-            'MinPoints',
-            'nr_superquadrics',
-            'total_dist_difference',
-            'total_size_difference',
-            'total_score']
-
-        total_list = []
-        total_length = len(self.OutlierRatio)* len(self.MaxIterationEM)* len(self.Sigma)* len(self.Eps)* len(self.MinPoints)
-        count = 1
-
-
-        for a, b, c, d, e in product(self.OutlierRatio, self.MaxIterationEM, self.Sigma, self.Eps, self.MinPoints ):
+    sum_total_score = 0
+    i = 0 
+    count_scores = 0
+    for i in range(len(pointclouds)):          # for pointcloud in iteration 30
+        try: 
             list_quadrics = fixed_nr_ems(
-                partial_pointcloud, 
-                OutlierRatio = self.OutlierRatio[a],             
-                MaxIterationEM = self.MaxIterationEM[b],            
-                ToleranceEM = self.ToleranceEM,            
-                RelativeToleranceEM = self.RelativeToleranceEM,      
-                MaxOptiIterations = self.MaxOptiIterations,          
-                Sigma = self.Sigma[c],                    
-                MaxiSwitch = self.MaxiSwitch,                 
-                AdaptiveUpperBound = self.AdaptiveUpperBound,      
-                Rescale = self.Rescale,                 
-                MaxLayer = self.MaxLayer,                   
-                Eps = self.Eps[d],                    
-                MinPoints = self.MinPoints[e],               
-                nr_superquadrics = self.nr_superquadrics)
+                pointclouds[i], 
+                OutlierRatio = OutlierRatio,             
+                MaxIterationEM = MaxIterationEM,            
+                ToleranceEM = ToleranceEM,            
+                RelativeToleranceEM = RelativeToleranceEM,      
+                MaxOptiIterations = MaxOptiIterations,          
+                Sigma = Sigma,                    
+                MaxiSwitch = MaxiSwitch,                 
+                AdaptiveUpperBound = AdaptiveUpperBound,      
+                Rescale = Rescale,                 
+                MaxLayer = MaxLayer,                   
+                Eps = Eps,                    
+                MinPoints = MinPoints,               
+                nr_superquadrics = 2)
 
             value_quadrics =[]
             for k in range(len(list_quadrics)):
@@ -159,59 +105,104 @@ class Main:
                 )
             superquadrics = np.reshape(value_quadrics, (-1, 12))
 
+            total_size_diff_norm, _, col_ind = size_diff(dimensions[i], superquadrics)
+            total_dist_diff_norm = dist_difference(distances[i], superquadrics)
+            total_score = (total_size_diff_norm + total_dist_diff_norm)/2.0
+            sum_total_score += total_score
+            print("iteration pointcloud: " + str(i) + "/" + str(len(pointclouds)))
+            count_scores += 1
+        except: 
+            print("failure")
+            sum_total_score += 1
 
-            total_dist_difference, _ = dist_difference(self.distance, superquadrics)
-            total_size_difference, _, col_ind = size_diff(self.size, superquadrics)
-            total_score = total_size_difference + total_dist_difference
+    normalized_score = sum_total_score/len(pointclouds)
+    return normalized_score
 
-            print("   ***total distance difference", total_dist_difference)
-            print("   ***total size difference", total_size_difference)
-            print("   ***total error", total_score)
+def load_pointcloud(location):
+    root = tk.Tk()
+    root.withdraw()
+    root.filename = askopenfilename(initialdir=location, title="Select file",
+                                            filetypes=[("Pointcloud", "*.ply")])
+    source = o3d.io.read_point_cloud(root.filename)
+    partial_pointcloud = np.asarray(source.points)
+    return partial_pointcloud
 
-            # for z in range(len(col_ind)):
-            #     print("object: ", z, " is matched with quadric: " ,col_ind[z])
-            # print("\n")
-
-            mylist = [
-                self.OutlierRatio[a],
-                self.MaxIterationEM[b],
-                self.ToleranceEM,
-                self.RelativeToleranceEM,
-                self.MaxOptiIterations,
-                self.Sigma[c],
-                self.MaxiSwitch,
-                self.AdaptiveUpperBound,
-                self.Rescale,
-                self.MaxLayer,
-                self.Eps[d],
-                self.MinPoints[e],
-                self.nr_superquadrics,
-                total_dist_difference, 
-                total_size_difference, 
-                total_score]
-
-            total_list.append(mylist)
-
-            print("Iteration ", count, "/", total_length)
-            count += 1
-
-
-        t = time.localtime()
-        timestamp = time.strftime('%b-%d-%Y_%H%M%S', t)
-        with open(self.package_path + "/parameter_tuning/parameters-" + timestamp + ".csv", 'w', newline='') as myfile:
-            wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-            wr.writerow(headerList)
-            for i in range(len(total_list)):
-                wr.writerow(total_list[i])
-
-
-        print("finished - uploaded data to ", self.package_path + "/parameter_tuning/parameters-" + timestamp + ".csv")
-
-
-        # if self.superquadric_visualize:
-        #     visualize_superquadric(partial_pointcloud, superquadrics)
-
+def load_yaml(product_type):
+    product = products["products"]
+    product_info = product[product_type]
+    dimensions = np.array([[]])
+    distance = np.array([[]])
+    for keys in product_info.keys():
+        if keys == "dist":
+            x = product_info[keys]["x"] 
+            y = product_info[keys]["y"]
+            z = product_info[keys]["z"]
+            distance = np.append(distance, [x,y,z])
+        else:
+            x = product_info[keys]["x"]
+            y = product_info[keys]["y"]
+            z = product_info[keys]["z"]
+            dimensions = np.append(dimensions, [x,y,z])
+    dimensions = np.reshape(dimensions, (-1, 3))
+    return dimensions, distance
 
 if __name__ == "__main__":
-    start = Main()
-    start.run()
+    data_orientations = {}
+    pointclouds = []
+    dimensions = []
+    distances = []
+
+    rospack = rospkg.RosPack()
+    package_path = rospack.get_path("grasp_generator")
+    directory_yaml = package_path + "/config/experiment_products.yaml"
+    directory_orientation = package_path + "/data/parameter_tuning/poses/orientation.pkl"
+    directory_product = package_path + "/data/parameter_tuning/"
+
+    with open(directory_yaml) as stream:
+        products = yaml.safe_load(stream)
+
+    with open(directory_orientation, "rb") as f: 
+        while True:
+            try:
+                data_orientations.update(pickle.load(f))
+            except EOFError:
+                break
+
+    for filename in os.listdir(directory_product):
+        name, ext = os.path.splitext(filename)
+        if ext == '.ply':    
+            product_type = filename.split('-')[0]
+            dimension, distance = load_yaml(product_type)
+            quaternion = Quaternion(data_orientations[name][0], data_orientations[name][1], data_orientations[name][2], data_orientations[name][3])
+            distance_rot = quaternion.rotate(distance)
+            source = o3d.io.read_point_cloud(directory_product + filename)
+            partial_pointcloud = np.asarray(source.points)
+            
+            pointclouds.append(partial_pointcloud)
+            dimensions.append(dimension)
+            distances.append(distance_rot)
+
+    study = optuna.create_study(direction="minimize")
+    study.optimize(lambda trial: objective(trial, pointclouds, dimensions, distances),
+            n_trials=500)
+
+    study_id = study._study_id
+    best_params = study.best_params
+
+
+
+    # save results: 
+    save_figures = True
+    if save_figures: 
+        directory_fig = package_path + "/data/figures/"
+        if not os.path.exists(directory_fig):
+            os.makedirs(directory_fig)
+
+        fig_opt = plot_optimization_history(study)
+        fig_par = plot_parallel_coordinate(study)
+
+        plotly.offline.plot(fig_opt, filename= directory_fig +"_optimization_3.html", auto_open = False)
+        plotly.offline.plot(fig_par, filename= directory_fig +"_parallel_coordinates_3.html", auto_open = False)           
+
+
+        joblib.dump(study, directory_fig+"study3.pkl")
