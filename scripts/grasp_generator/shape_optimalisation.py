@@ -104,15 +104,17 @@ def objective(trial, pointclouds, dimensions, distances):
                     )
                 )
             superquadrics = np.reshape(value_quadrics, (-1, 12))
-
-            total_size_diff_norm, _, col_ind = size_diff(dimensions[i], superquadrics)
-            total_dist_diff_norm = dist_difference(distances[i], superquadrics)
-            total_score = (total_size_diff_norm + total_dist_diff_norm)/2.0
-            sum_total_score += total_score
-            print("iteration pointcloud: " + str(i) + "/" + str(len(pointclouds)))
-            count_scores += 1
+            if len(superquadrics) == 2: 
+                total_size_diff_norm, _, col_ind = size_diff(dimensions[i], superquadrics)
+                total_dist_diff_norm = dist_difference(distances[i], superquadrics)
+                total_score = (total_size_diff_norm + total_dist_diff_norm)/2.0
+                sum_total_score += total_score
+                print("iteration pointcloud: " + str(i) + "/" + str(len(pointclouds)))
+                count_scores += 1
+            else: 
+                raise Exception('Number of generated quadrics not 2.')
         except: 
-            print("failure")
+            print("failure: " + str(i) + "/" + str(len(pointclouds)))
             sum_total_score += 1
 
     normalized_score = sum_total_score/len(pointclouds)
@@ -156,7 +158,7 @@ if __name__ == "__main__":
     package_path = rospack.get_path("grasp_generator")
     directory_yaml = package_path + "/config/experiment_products.yaml"
     directory_orientation = package_path + "/data/parameter_tuning/poses/orientation.pkl"
-    directory_product = package_path + "/data/parameter_tuning/"
+    directory_product = package_path + "/data/parameter_tuning/mug/"
 
     with open(directory_yaml) as stream:
         products = yaml.safe_load(stream)
@@ -184,7 +186,7 @@ if __name__ == "__main__":
 
     study = optuna.create_study(direction="minimize")
     study.optimize(lambda trial: objective(trial, pointclouds, dimensions, distances),
-            n_trials=500)
+            n_trials=50)
 
     study_id = study._study_id
     best_params = study.best_params
@@ -201,8 +203,8 @@ if __name__ == "__main__":
         fig_opt = plot_optimization_history(study)
         fig_par = plot_parallel_coordinate(study)
 
-        plotly.offline.plot(fig_opt, filename= directory_fig +"_optimization_3.html", auto_open = False)
-        plotly.offline.plot(fig_par, filename= directory_fig +"_parallel_coordinates_3.html", auto_open = False)           
+        plotly.offline.plot(fig_opt, filename= directory_fig +"_optimization_cup.html", auto_open = False)
+        plotly.offline.plot(fig_par, filename= directory_fig +"_parallel_coordinates_cup.html", auto_open = False)           
 
 
-        joblib.dump(study, directory_fig+"study3.pkl")
+        joblib.dump(study, directory_fig+"study_cup.pkl")

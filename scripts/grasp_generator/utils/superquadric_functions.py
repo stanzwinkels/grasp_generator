@@ -1,10 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3.6
 
 # Libraries
 import numpy as np
 import trimesh
 from scipy.spatial.transform import Rotation as R
-
 
 import pdb
 
@@ -42,8 +41,6 @@ def grasp_quadric_distance(superquadrics, grasps):
 
     for j in range(len(grasps)): 
         grasp_point = [grasps[j][1].position.x, grasps[j][1].position.y, grasps[j][1].position.z]
-        
-
         for i in range(len(superquadrics)):
             eps = superquadrics[i][0:2]
             scale = superquadrics[i][2:5]
@@ -123,14 +120,19 @@ def superquadric_overlapping(superquadrics, threshold_max_overlap = 0.5):
                 new_points[k] =  np.dot(np.linalg.inv(rotation_matrix_orig), (new_points[k] - translation_orig))
 
             mesh = trimesh.convex.convex_hull(new_points)
-            points = trimesh.sample.sample_surface_even(mesh, 5000)
-            points = np.array(points[0])
+            points = trimesh.sample.volume_mesh(mesh, 5000)
+            points = np.array(points)
             values = comp_superquadric(points, scale_orig, shape_orig)
             score[i][j] = (sum(i < 1.0001 for i in values))/float(len(values))
-    max_values = np.max(score, axis=0)
-    indexes = ([idx for idx in range(len(max_values)) if max_values[idx] > threshold_max_overlap])
-    filt_superquadrics = [v for i, v in enumerate(superquadrics) if i not in indexes]                        
+
+    remove_shapes = []
+    for r in range(len(score)):
+        for t in range(len(score)):
+            if score[r,t] > threshold_max_overlap and score[r,t] >  score[t,r]:
+                remove_shapes.append(t)
+    filt_superquadrics = [v for i, v in enumerate(superquadrics) if i not in remove_shapes]  
     print("\n score \n", score)
+    
     return filt_superquadrics, score
 
 

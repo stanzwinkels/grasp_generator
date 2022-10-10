@@ -1,6 +1,5 @@
 
 
-import rospy
 import numpy as np
 import ast
 import plotly.graph_objects as go
@@ -8,7 +7,8 @@ import plotly.graph_objects as go
 from itertools import cycle
 from scipy.spatial.transform import Rotation as R
 
-palette = cycle(['black', 'red', 'green', 'orange', 'yellow', 'purple', 'grey'])     
+# palette = cycle(['black', 'red', 'green', 'orange', 'yellow', 'purple', 'grey'])     
+palette = cycle(['black', 'red', 'green'])     
 
 
 def visualize_highlight_superquadric(pointcloud, superquadrics, request_ID):
@@ -104,8 +104,8 @@ def visualize_superquadric(pointcloud, superquadrics):
                 y=new_points[:,1], 
                 z=new_points[:,2], 
                 # z=np.array(z_mesh.flatten()),
-                alphahull= 0, 
-                color=next(palette), 
+                alphahull= 0,                 
+                color=next(palette),
                 opacity=0.50
                 ))
 

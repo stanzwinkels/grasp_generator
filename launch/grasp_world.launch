@@ -4,7 +4,7 @@
   <!-- Load world map retail store (krr store) -->
   <include file="$(find retail_store_simulation)/launch/simulation.launch">
     <arg name="rviz" value="true" />
-    <arg name="world" value="thesis_stan" />
+    <arg name="world" value="krr" />
     <arg name="use_moveit_camera" value="false"/>
   </include>
 
@@ -45,6 +45,11 @@
 
   <!-- linkage aruco marker to product types -->
   <rosparam file="$(find grasp_generator)/config/products.yaml" />
+
+  <!-- parameters -->
+  <rosparam file="$(find grasp_generator)/config/pointcloud_filtering.yaml" />
+  <rosparam file="$(find grasp_generator)/config/multi_quadric.yaml" />
+
 
 </launch>
 

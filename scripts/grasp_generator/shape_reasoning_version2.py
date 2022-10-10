@@ -61,7 +61,7 @@ class Main:
     def run(self):
         if self.load:
             partial_pointcloud = load_pointcloud(
-                self.package_path + "/data/" + self.product)
+                self.package_path + "/data/parameter_tuning")
 
         if not self.load:
             pointcloud = rospy.wait_for_message(
@@ -81,12 +81,12 @@ class Main:
         multiquadric = MultiquadricClient()
         superquadrics = multiquadric.run(pointcloud_msg)
         superquadrics = np.reshape(superquadrics.quadrics, (-1, 12))
+
         if self.superquadric_visualize:
             visualize_superquadric(partial_pointcloud, superquadrics)
         filt_superquadrics, score = superquadric_overlapping(superquadrics)
         if self.superquadric_visualize:
             visualize_superquadric(partial_pointcloud, filt_superquadrics)
-
 
         # 3. prolog reasoning
         prolog_reasoning = PrologFunctionTask()

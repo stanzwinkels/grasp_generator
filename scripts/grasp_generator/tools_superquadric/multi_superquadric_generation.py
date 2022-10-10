@@ -5,7 +5,6 @@ import numpy as np
 
 from grasp_generator.tools_superquadric.single_superquadric_generation import EMS_recovery
 from sklearn.cluster import DBSCAN
-from scipy.spatial.transform import Rotation as R
 
 def hierarchical_ems(
     point,
@@ -21,6 +20,8 @@ def hierarchical_ems(
     MaxLayer=rospy.get_param('hierachical_ems/MaxLayer'),                       # maximum depth
     Eps=rospy.get_param('hierachical_ems/Eps'),                                 # 0.03 IMPORTANT: varies based on the size of the input pointcoud (DBScan parameter)
     MinPoints=rospy.get_param('hierachical_ems/MinPoints'),                     # DBScan parameter required minimum points
+    Max_superquadrics = rospy.get_param('hierachical_ems/Max_superquadrics')
+
 ):
 
     point_seg = {key: [] for key in list(range(0, MaxLayer+1))}
@@ -29,9 +30,14 @@ def hierarchical_ems(
     list_quadrics = []
     quadric_count = 1
 
-    for h in range(MaxLayer):
+
+    for h in range(MaxLayer):           # number of iterations.
+        if quadric_count > Max_superquadrics:
+            return list_quadrics
         for c in range(len(point_seg[h])):
-            #print(f"Counting number of generated quadrics: {quadric_count}")
+            if quadric_count > Max_superquadrics:
+                return list_quadrics
+
             quadric_count += 1
             x_raw, p_raw = EMS_recovery(
                 point_seg[h][c],

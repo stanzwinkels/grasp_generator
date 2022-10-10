@@ -11,7 +11,8 @@
 :- load_owl('package://grasp_generator/owl/primitive_ontol.owl', [namespace(pap, 'http://www.semanticweb.org/stanz/primitive-ontol#')]).
 
 % Add prolog modules that you want to load when starting the prolog package
-:- use_module(library('method_affordance')).
-:- use_module(library('method_direct_link')).
-:- use_module(library('tasks')).
+:- use_module(library('shape_to_task')).
+:- use_module(library('shape_to_function_to_task')).
+:- use_module(library('functions')).
+% :- use_module(library('tasks')).
 

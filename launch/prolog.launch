@@ -22,6 +22,11 @@
   <!-- Product initial parameters -->
   <rosparam file="$(find grasp_generator)/config/products.yaml" />
 
+  <!-- servers for performing the pipeline -->
+  <rosparam file="$(find grasp_generator)/config/multi_quadric.yaml" />
+  <node name="multiquadric_server" pkg="grasp_generator" type="multiquadric_server.py" cwd="node" output="screen" />
+
+
 </launch>
 
 
