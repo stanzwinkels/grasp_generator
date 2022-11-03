@@ -10,10 +10,31 @@ import time
 import os
 import tkinter as tk
 from tkFileDialog import askopenfilename
+import pickle
+import pdb
+from scipy.spatial import KDTree
 
 # messages
 from geometry_msgs.msg import Pose, PoseStamped, Point32
 from tf.transformations import quaternion_multiply, quaternion_conjugate, quaternion_from_matrix
+
+
+def create_dict(list_values): 
+    result = {}
+    for d in list_values:
+        result.update(d)
+    return result
+
+def load_data(location):
+    data = {}
+    with open(location, "rb") as f: 
+        while True:
+            try:
+                data.update(pickle.load(f))
+            except EOFError:
+                break
+    return data
+
 
 def load_pointcloud(location):
     root = tk.Tk()
@@ -22,7 +43,9 @@ def load_pointcloud(location):
                                             filetypes=[("Pointcloud", "*.ply")])
     source = o3d.io.read_point_cloud(root.filename)
     partial_pointcloud = np.asarray(source.points)
-    return partial_pointcloud
+    colors_pointcloud = np.asarray(source.colors)
+    return partial_pointcloud, os.path.basename(root.filename), colors_pointcloud
+
 
 
 def save_pointcloud(pointcloud, product, location): 
@@ -38,6 +61,77 @@ def save_pointcloud(pointcloud, product, location):
     else: 
         print("not saving\n")
     return 
+
+
+def filter_full_pointcloud(pointcloud_gt, colors_gt): 
+    black = np.array([0, 0 ,0])
+    red = np.array([1,0,0])
+    white = np.array([1,1,1])
+
+    
+    ground_truth = np.empty(len(pointcloud_gt))
+    for idx, color in enumerate(colors_gt):
+        if (color == black).all():
+            ground_truth[idx] = 0
+        elif (color == red).all():
+            ground_truth[idx] = 1
+        else: 
+            ground_truth[idx] = -1
+    pointcloud_gt = pointcloud_gt[ground_truth >= 0]
+    ground_truth = ground_truth[ground_truth >= 0]
+    return pointcloud_gt, ground_truth
+
+def accuracy_overlap(pointcloud_gt, ground_truth, partial_pointcloud, partial_pointcloud_color):
+    tree = KDTree(pointcloud_gt)
+    dist, ids = tree.query(partial_pointcloud, k=1)
+    tp, fp, tn, fn = [], [], [], []
+    accuracy = []
+
+    for idx_color, color in enumerate(partial_pointcloud_color):
+        if color == 0: 
+            if color == ground_truth[ids[idx_color]]:
+                tp.append(True)         # the predicted value is black, and it should be black
+            else:
+                fp.append(True)         # the predicted value is black, but it should have been red
+        elif color == 1: 
+            if color == ground_truth[ids[idx_color]]:
+                tn.append(True)         # the predicted value is red, and it should be red
+            else: 
+                fn.append(True)         # the predicted value is red, but it should be black
+
+    accuracy = float(sum(tp)+sum(tn))/len(partial_pointcloud_color)
+    true_positive_rate = float(sum(tp))/(sum(tp)+sum(fp))
+    print("Accuracy = " + str(accuracy*100) + "%")
+    print("True positive rate = " + str(true_positive_rate*100) + "%")
+ 
+    return accuracy, true_positive_rate
+
+def accuracy_overlap_partial(pointcloud_gt, ground_truth, partial_pointcloud, partial_pointcloud_label):
+    tree = KDTree(pointcloud_gt)
+    dist, ids = tree.query(partial_pointcloud, k=1)
+    tp, fp, tn, fn = [], [], [], []
+    accuracy = []
+
+    for idx_label, ID in enumerate(partial_pointcloud_label):
+        if ID == 0: 
+            if ID == ground_truth[ids[idx_label]]:
+                tp.append(True)         # the predicted value is black, and it should be black
+            else:
+                fp.append(True)         # the predicted value is black, but it should have been red
+        elif ID == 1: 
+            if ID == ground_truth[ids[idx_label]]:
+                tn.append(True)         # the predicted value is red, and it should be red
+            else: 
+                fn.append(True)         # the predicted value is red, but it should be black
+
+    accuracy = (float(sum(tp)+sum(tn))/len(partial_pointcloud_label))*100
+    true_positive_rate = (float(sum(tp))/(sum(tp)+sum(fp)))*100
+    print("Accuracy = " + str(accuracy) + "%")
+    print("True positive rate = " + str(true_positive_rate) + "%")
+    pdb.set_trace()
+    return accuracy, true_positive_rate
+
+
 
 
 # converts pointcloud to a correct message

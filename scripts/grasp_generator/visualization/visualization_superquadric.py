@@ -6,9 +6,10 @@ import plotly.graph_objects as go
 
 from itertools import cycle
 from scipy.spatial.transform import Rotation as R
-
+import pdb
 # palette = cycle(['black', 'red', 'green', 'orange', 'yellow', 'purple', 'grey'])     
 palette = cycle(['black', 'red', 'green'])     
+palette2 = cycle(['black', 'red', 'green'])     
 
 
 def visualize_highlight_superquadric(pointcloud, superquadrics, request_ID):
@@ -141,6 +142,110 @@ def visualize_superquadric(pointcloud, superquadrics):
     fig.show()
     return
     
+
+def visualize_superquadric_segmentation(closest_primitive, pointcloud, superquadrics):
+    fig = go.Figure()
+
+    for idx, superquadric in enumerate(superquadrics):
+        shape = superquadric[0:2]
+        scale = superquadric[2:5]
+        quaternion = superquadric[5:9]
+        translation = superquadric[9:12]
+        q = R.from_quat(quaternion)
+        rotation_matrix = q.as_dcm() 
+        new_points = showSuperquadrics(shape, scale, rotation_matrix, translation)
+        
+        fig.add_trace(
+            go.Mesh3d(
+                name = 'superquadric '+ str(idx+1),
+                showlegend=True,
+                x=new_points[:,0], 
+                y=new_points[:,1], 
+                z=new_points[:,2], 
+                # z=np.array(z_mesh.flatten()),
+                alphahull= 0,                 
+                color=next(palette),
+                opacity=0.50
+                ))
+
+    for value in set(closest_primitive): 
+        segmented_pointcloud = pointcloud[closest_primitive == value]
+        fig.add_trace(
+            go.Scatter3d(
+                name = 'pointcloud',
+                showlegend=True,
+                x=segmented_pointcloud[:,0], 
+                y=segmented_pointcloud[:,1], 
+                z=segmented_pointcloud[:,2],
+                mode = 'markers', 
+                marker=dict(size=1, 
+                            color=next(palette2),
+                            opacity=0.7)))
+    fig.update_scenes(
+        xaxis_visible=False, 
+        yaxis_visible=False,
+        zaxis_visible=False,
+    )
+
+    fig.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        showlegend=True
+                # scene = dict(
+                #         xaxis = dict(nticks=1, range=[-0.1,0.19],),
+                #         yaxis = dict(nticks=1, range=[-0.09,0.19],),
+                #         zaxis = dict(nticks=1, range=[0.48,0.78],),),
+                #         width=1100,
+                #         margin=dict(r=0.02, l=0.010, b=0.010, t=0.010)
+                        )
+    fig.show()
+    return
+    
+
+def visualize_pointclouds(partial_pointcloud, full_pointcloud): 
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'partial pointcloud',
+            showlegend=True,
+            x=partial_pointcloud[:,0], 
+            y=partial_pointcloud[:,1], 
+            z=partial_pointcloud[:,2],
+            mode = 'markers', 
+            marker=dict(size=1, 
+                        color=next(palette2),
+                        opacity=0.7)))
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'full pointcloud',
+            showlegend=True,
+            x=full_pointcloud[:,0], 
+            y=full_pointcloud[:,1], 
+            z=full_pointcloud[:,2],
+            mode = 'markers', 
+            marker=dict(size=1, 
+                        color=next(palette2),
+                        opacity=0.7)))
+    fig.update_scenes(
+        xaxis_visible=False, 
+        yaxis_visible=False,
+        zaxis_visible=False,
+    )
+
+    fig.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        showlegend=True
+                # scene = dict(
+                #         xaxis = dict(nticks=1, range=[-0.1,0.19],),
+                #         yaxis = dict(nticks=1, range=[-0.09,0.19],),
+                #         zaxis = dict(nticks=1, range=[0.48,0.78],),),
+                #         width=1100,
+                #         margin=dict(r=0.02, l=0.010, b=0.010, t=0.010)
+                        )
+    fig.show()
+    return
+
 
 def showSuperquadrics(shape, scale, rotation, translation, threshold = 1e-2, num_limit = 10000, arclength = 0.3):
     # avoid numerical instability in sampling

@@ -11,21 +11,20 @@ from math import sqrt, tanh
 import pdb
 from scipy.optimize import linear_sum_assignment
 import os
-import pickle
+import json
 import joblib
 import plotly
 import plotly.express as px
+import plotly.graph_objects as go
 
 # Superquadric generator
 from grasp_generator.tools_superquadric.multi_superquadric_fixed_number import fixed_nr_ems
-
 
 # Visualization
 from grasp_generator.visualization.visualization_superquadric import visualize_superquadric
 
 # Rotation
 from pyquaternion import Quaternion
-
 
 import optuna
 from optuna.visualization import plot_optimization_history, plot_parallel_coordinate
@@ -35,7 +34,7 @@ def size_diff(size, superquadrics):
     sum_size_matrix = np.zeros([len(size), len(size)])
     n = len(size)
     select_matrix = np.array([[[0 for k in range(3)] for j in range(n)] for i in range(n)])
-
+    print("Size superquadric: ", superquadrics[:, 2:5])
     for i in range(len(size)):
         for j in range(len(superquadrics)):
             cost = np.array([[np.abs(size[i][0] - superquadrics[j, 2]), np.abs(size[i][0] - superquadrics[j, 3]), np.abs(size[i][0] - superquadrics[j, 4])],
@@ -54,6 +53,7 @@ def dist_difference(distance, superquadrics):
     distQ1 = np.array([superquadrics[:,9][0] - superquadrics[:,9][1], superquadrics[:,10][0] - superquadrics[:,10][1], superquadrics[:,11][0] - superquadrics[:,11][1]])
     distQ2 = np.array([superquadrics[:,9][1] - superquadrics[:,9][0], superquadrics[:,10][1] - superquadrics[:,10][0], superquadrics[:,11][1] - superquadrics[:,11][0]])
     min_difference = np.array([np.abs((distance - distQ1)).sum(), np.abs((distance - distQ2)).sum()]).min()
+    print("Min difference Q1" + str(distQ1) + " Q2: " + str(distQ2))
     norm_min_difference = tanh(np.abs(min_difference))
     return norm_min_difference
 
@@ -65,7 +65,7 @@ def objective(trial, pointclouds, dimensions, distances):
     MaxOptiIterations = 2                                                               # maximum number of optimization iterations per M (default: 2)
     Sigma = 0.3                                                                         # 0.3 initial sigma^2 (default: 0 - auto generate)
     MaxiSwitch = trial.suggest_int("MaxiSwitch", 1, 4, step=1)                          # maximum number of switches allowed (default: 2)
-    AdaptiveUpperBound = trial.suggest_categorical("AdaptiveUpperBound", [True, False]) # Introduce adaptive upper bound to restrict the volume of SQ (default: false)
+    AdaptiveUpperBound = False
     Rescale = True                                                                      # normalize the input point cloud (default: true)
     MaxLayer = 3                                                                        # maximum depth
     Eps = trial.suggest_float('Eps',0.001, 0.1)                                         # 0.03 IMPORTANT: varies based on the size of the input pointcoud (DBScan parameter)
@@ -73,7 +73,6 @@ def objective(trial, pointclouds, dimensions, distances):
 
     sum_total_score = 0
     i = 0 
-    count_scores = 0
     for i in range(len(pointclouds)):          # for pointcloud in iteration 30
         try: 
             list_quadrics = fixed_nr_ems(
@@ -107,15 +106,17 @@ def objective(trial, pointclouds, dimensions, distances):
             if len(superquadrics) == 2: 
                 total_size_diff_norm, _, col_ind = size_diff(dimensions[i], superquadrics)
                 total_dist_diff_norm = dist_difference(distances[i], superquadrics)
-                total_score = (total_size_diff_norm + total_dist_diff_norm)/2.0
+                total_score = (total_size_diff_norm + total_dist_diff_norm*5)/2.0
+                print("iteration pointcloud: " + str(i+1) + "/" + str(len(pointclouds)) + ", size score: " + str(total_size_diff_norm) + ", dist score: " + str(total_dist_diff_norm))
                 sum_total_score += total_score
-                print("iteration pointcloud: " + str(i) + "/" + str(len(pointclouds)))
-                count_scores += 1
+
             else: 
                 raise Exception('Number of generated quadrics not 2.')
         except: 
-            print("failure: " + str(i) + "/" + str(len(pointclouds)))
+            print("failure: " + str(i+1) + "/" + str(len(pointclouds)))
             sum_total_score += 1
+
+        # print("sum= " + str(sum_total_score), ", added: " + str(total_score))
 
     normalized_score = sum_total_score/len(pointclouds)
     return normalized_score
@@ -148,8 +149,33 @@ def load_yaml(product_type):
     dimensions = np.reshape(dimensions, (-1, 3))
     return dimensions, distance
 
+
+def visualize_pointclouds(pointcloud):
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'pointcloud',
+            showlegend=True,
+            x=pointcloud[:,0], 
+            y=pointcloud[:,1], 
+            z=pointcloud[:,2],
+            mode = 'markers', 
+            marker=dict(size=1, 
+                        color='blue',
+                        opacity=0.7)))
+    fig.update_scenes()
+    fig.update_layout(showlegend=True)
+    fig.show()
+
+def create_dict(list_values): 
+    result = {}
+    for d in list_values:
+        result.update(d)
+    return result
+
+
 if __name__ == "__main__":
-    data_orientations = {}
+    data_cam_orientations, data_cam_positions, data_orientations, data_positions = {}, {}, {}, {}
     pointclouds = []
     dimensions = []
     distances = []
@@ -157,41 +183,53 @@ if __name__ == "__main__":
     rospack = rospkg.RosPack()
     package_path = rospack.get_path("grasp_generator")
     directory_yaml = package_path + "/config/experiment_products.yaml"
-    directory_orientation = package_path + "/data/parameter_tuning/poses/orientation.pkl"
-    directory_product = package_path + "/data/parameter_tuning/mug/"
+    directory_map_orientation_camera = package_path + "/data/parameter_tuning/bottle/poses/map_orientation_camera.json"
+    directory_map_position_camera = package_path + "/data/parameter_tuning/bottle/poses/map_position_camera.json"
+    directory_map_orientation_product = package_path + "/data/parameter_tuning/bottle/poses/map_orientation_product.json"
+    directory_map_position_product = package_path + "/data/parameter_tuning/bottle/poses/map_position_product.json"
+
+    directory_product = package_path + "/data/parameter_tuning/bottle/"
 
     with open(directory_yaml) as stream:
         products = yaml.safe_load(stream)
 
-    with open(directory_orientation, "rb") as f: 
-        while True:
-            try:
-                data_orientations.update(pickle.load(f))
-            except EOFError:
-                break
+    map_position_camera = json.load(open(directory_map_position_camera))
+    map_orientation_camera = json.load(open(directory_map_orientation_camera))   
+    map_orientation_product = json.load(open(directory_map_orientation_product))
+    map_position_product = json.load(open(directory_map_position_product))
+
+    map_position_camera= create_dict(map_position_camera)
+    map_orientation_camera= create_dict(map_orientation_camera)
+    map_orientation_product=create_dict(map_orientation_product)
+    map_position_product=create_dict(map_position_product)
 
     for filename in os.listdir(directory_product):
         name, ext = os.path.splitext(filename)
         if ext == '.ply':    
             product_type = filename.split('-')[0]
             dimension, distance = load_yaml(product_type)
-            quaternion = Quaternion(data_orientations[name][0], data_orientations[name][1], data_orientations[name][2], data_orientations[name][3])
-            distance_rot = quaternion.rotate(distance)
+            quaternion_object = Quaternion(map_orientation_product[name][0], map_orientation_product[name][1], map_orientation_product[name][2], map_orientation_product[name][3])
+            distance_obj = quaternion_object.rotate(distance)
+            quaternion_cam = Quaternion(map_orientation_camera[name][0], map_orientation_camera[name][1], map_orientation_camera[name][2], map_orientation_camera[name][3])
+            inv_quaternion_cam = quaternion_cam.inverse
+            distance_cam = inv_quaternion_cam.rotate(distance_obj)
+
             source = o3d.io.read_point_cloud(directory_product + filename)
             partial_pointcloud = np.asarray(source.points)
             
             pointclouds.append(partial_pointcloud)
             dimensions.append(dimension)
-            distances.append(distance_rot)
+            distances.append(distance_cam)
 
+            visualize_pointclouds(partial_pointcloud)
+    
+    pdb.set_trace()
     study = optuna.create_study(direction="minimize")
     study.optimize(lambda trial: objective(trial, pointclouds, dimensions, distances),
-            n_trials=50)
+            n_trials=100)
 
     study_id = study._study_id
     best_params = study.best_params
-
-
 
     # save results: 
     save_figures = True
@@ -204,7 +242,5 @@ if __name__ == "__main__":
         fig_par = plot_parallel_coordinate(study)
 
         plotly.offline.plot(fig_opt, filename= directory_fig +"_optimization_cup.html", auto_open = False)
-        plotly.offline.plot(fig_par, filename= directory_fig +"_parallel_coordinates_cup.html", auto_open = False)           
-
-
+        plotly.offline.plot(fig_par, filename= directory_fig +"_parallel_coordinates_cup.html", auto_open = False)
         joblib.dump(study, directory_fig+"study_cup.pkl")

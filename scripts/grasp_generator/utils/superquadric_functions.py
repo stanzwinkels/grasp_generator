@@ -231,3 +231,31 @@ def angle2points(theta, scale, epsilon):
 
     return point
 
+
+
+def point_cloud_segmentation(superquadrics, points):
+    """
+    Function to segment the partial point cloud using the radial euclidean distance function. 
+    """ 
+
+    closest_primitive = np.zeros(len(points))
+    distances = np.zeros(len(points))
+
+    for idx_point, point in enumerate(points): 
+        for idx_quad, superquadric in enumerate(superquadrics):
+            eps = superquadric[0:2]
+            scale = superquadric[2:5]
+            quaternion = superquadric[5:9]
+            translation = superquadric[9:12]
+            q = R.from_quat(quaternion)
+            rotation_matrix = q.as_dcm()
+
+
+            point_q_frame =  np.dot(np.linalg.inv(rotation_matrix), (point - translation))           
+            distance = radial_euclidean_distance(point_q_frame, scale, eps)
+
+            if distance < distances[idx_point] or distances[idx_point] == 0:
+                closest_primitive[idx_point] = (idx_quad+1)
+                distances[idx_point] = distance
+
+    return closest_primitive, distances

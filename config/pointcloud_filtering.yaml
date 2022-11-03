@@ -11,6 +11,6 @@ plane_segmentation:
  
 mesh: 
   voxel_size: 0.0017
-  alpha: 0.05
+  alpha: 0.02
   mesh_sampling_points: 5000
   
