@@ -2,6 +2,7 @@
 
 import numpy as np
 import ast
+from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
 from itertools import cycle
@@ -11,6 +12,46 @@ import pdb
 palette = cycle(['black', 'red', 'green'])     
 palette2 = cycle(['black', 'red', 'green'])     
 
+
+
+def visualize_gt_pred(pointcloud_gt, ground_truth, partial_pointcloud, partial_pred):
+    fig = make_subplots(
+        rows=1, cols=2,
+        specs=[[{'type': 'surface'}, {'type': 'surface'}]]
+    )
+
+    for value in set(ground_truth): 
+        segmented_pointcloud = pointcloud_gt[ground_truth == value]
+        fig.add_trace(
+            go.Scatter3d(
+                name = 'pointcloud',
+                showlegend=True,
+                x=segmented_pointcloud[:,0], 
+                y=segmented_pointcloud[:,1], 
+                z=segmented_pointcloud[:,2],
+                mode = 'markers', 
+                marker=dict(size=1, 
+                            color=next(palette),
+                            opacity=0.7)),
+                row=1, 
+                col=1)
+
+    for value in set(partial_pred): 
+        segmented_pointcloud = partial_pointcloud[partial_pred == value]
+        fig.add_trace(
+            go.Scatter3d(
+                name = 'pointcloud',
+                showlegend=True,
+                x=segmented_pointcloud[:,0], 
+                y=segmented_pointcloud[:,1], 
+                z=segmented_pointcloud[:,2],
+                mode = 'markers', 
+                marker=dict(size=1, 
+                            color=next(palette2),
+                            opacity=0.7)),
+                row=1, 
+                col=2)
+    fig.show()
 
 def visualize_highlight_superquadric(pointcloud, superquadrics, request_ID):
     fig = go.Figure()

@@ -128,7 +128,6 @@ def accuracy_overlap_partial(pointcloud_gt, ground_truth, partial_pointcloud, pa
     true_positive_rate = (float(sum(tp))/(sum(tp)+sum(fp)))*100
     print("Accuracy = " + str(accuracy) + "%")
     print("True positive rate = " + str(true_positive_rate) + "%")
-    pdb.set_trace()
     return accuracy, true_positive_rate
 
 
