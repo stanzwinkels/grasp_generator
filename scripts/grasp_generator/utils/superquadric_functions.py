@@ -4,6 +4,8 @@
 import numpy as np
 import trimesh
 from scipy.spatial.transform import Rotation as R
+from pyquaternion import Quaternion
+from scipy.spatial import KDTree
 
 import pdb
 
@@ -48,7 +50,6 @@ def grasp_quadric_distance(superquadrics, grasps):
             translation = superquadrics[i][9:12]
             q = R.from_quat(quaternion)
             rotation_matrix = q.as_dcm()
-
 
             new_grasp_point =  np.dot(np.linalg.inv(rotation_matrix), (grasp_point - translation))           
             distance = radial_euclidean_distance(new_grasp_point, scale, eps)
@@ -131,9 +132,9 @@ def superquadric_overlapping(superquadrics, threshold_max_overlap = 0.5):
             if score[r,t] > threshold_max_overlap and score[r,t] >  score[t,r]:
                 remove_shapes.append(t)
     filt_superquadrics = [v for i, v in enumerate(superquadrics) if i not in remove_shapes]  
-    print("\n score \n", score)
+    # print("Overlapping score: ", score)
     
-    return filt_superquadrics, score
+    return np.array(filt_superquadrics), score
 
 
 def showSuperquadrics(shape, scale, rotation, translation, threshold = 1e-2, num_limit = 10000, arclength = 0.3):
@@ -158,10 +159,7 @@ def showSuperquadrics(shape, scale, rotation, translation, threshold = 1e-2, num
             new_points.append(point_temp)    
     points_origin = np.array(points_origin)
     new_points = np.array(new_points)
-
     return new_points
-
-
 
 def uniformSampledSuperellipse(epsilon, scale, threshold = 1e-2, num_limit = 10000, arclength = 0.02):
     # initialize array storing sampled theta
@@ -259,3 +257,70 @@ def point_cloud_segmentation(superquadrics, points):
                 distances[idx_point] = distance
 
     return closest_primitive, distances
+
+
+
+def point_cloud_segmentation_cylinder(superquadrics, points, label, region, ID):
+    """
+    Function to segment the partial point cloud using the radial euclidean distance function. 
+
+    compare whether the superquadric shape is closer, or the newly created cylindrical surface. 
+        input: 
+            True: disk_top
+            False: disk_bottom, disk_surface, superquadrics \= ID
+
+            Output: segmented partial pointcloud!
+        
+        disk_top is requested region
+    """ 
+
+    true_region = region[label]
+    false_region = region[~label]
+
+    points_true = np.array([])
+    points_false = np.array([])
+    i, j = 0, 0
+
+    for i in range(len(true_region)):
+        points_true = np.append(points_true, true_region[i])
+
+    for j in range(len(false_region)):
+        points_false = np.append(points_false, false_region[j])
+
+    points_true = points_true.reshape(-1,3)
+    points_false = points_false.reshape(-1,3)
+
+    distance_pointcloud = np.zeros(len(points))
+    pred_label_pointcloud = np.zeros(len(points))
+
+    points_region_tree_true = KDTree(points_true)
+    dist_true, _ = points_region_tree_true.query(points, k=1)           # distance partial points to region
+
+    points_region_tree_neg = KDTree(points_false)                  # distance partial points to region
+    dist_neg, _ = points_region_tree_neg.query(points, k=1)
+
+    distance_pointcloud = np.where(dist_true < dist_neg, dist_true, dist_neg)
+    pred_label_pointcloud = np.where(dist_true < dist_neg, pred_label_pointcloud, 1)
+
+    for idx_point, point in enumerate(points): 
+        for j in [x for x in range(len(superquadrics)) if x != (ID-1)]:          
+            eps = superquadrics[j][0:2]
+            scale = superquadrics[j][2:5]
+            quaternion = Quaternion(superquadrics[j][5:9][3], superquadrics[j][5:9][0], superquadrics[j][5:9][1], superquadrics[j][5:9][2]).inverse
+            translation = superquadrics[j][9:12]
+
+            point_quat_frame = quaternion.rotate(point-translation)
+            distance = radial_euclidean_distance(point_quat_frame, scale, eps)
+
+            if distance < distance_pointcloud[idx_point]:
+                pred_label_pointcloud[idx_point] = (j+1)
+                distance_pointcloud[idx_point] = distance
+
+
+    # sample points that are "true", thus 0 
+    # use DBSCAN to sample clusters!
+    # keep biggest cluster only! assumption that biggest cluster is always the face that is suited for grasping. While this doesn't have to be the case. 
+    # solves also the problem of the pan!
+
+
+    return pred_label_pointcloud, distance_pointcloud

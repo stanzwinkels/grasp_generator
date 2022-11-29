@@ -11,7 +11,6 @@ from grasp_generator.srv import (
 class MultiquadricClient:
     def run(self, point_cloud):
         rate = rospy.Rate(1)
-
         try:
             multiquadric = rospy.ServiceProxy("/multiquadric_server", QuadricDetect)
             rospy.loginfo("waiting for quadric server")

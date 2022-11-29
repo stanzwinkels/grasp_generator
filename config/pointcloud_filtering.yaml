@@ -1,8 +1,8 @@
 perception_area:
-  max_depth_threshold: 0.8
-  min_depth_threshold: 0.2
-  max_width_threshold: 1.0     # rightside: set lower for smaller field
-  min_width_threshold: -0.4    # left_side: set higher for smaller field
+  max_depth_threshold: 1.8    # default 0.8
+  min_depth_threshold: 0.2    # default 0.2
+  max_width_threshold: 2.0    # default 1.0   # rightside: set lower for smaller field
+  min_width_threshold: -1.4   # default -0.4  # left_side: set higher for smaller field
   
 plane_segmentation:
   distance_threshold: 0.01

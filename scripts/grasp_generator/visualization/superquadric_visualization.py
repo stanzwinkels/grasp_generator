@@ -50,9 +50,9 @@ def comp_superquadric(points, scale, eps):
     return np.array(values)
 
 
-scale = np.array([1,1,1])
-alpha = [1.9, 1.7, 1.5, 1.3, 1.1, 0.9, 0.7, 0.5, 0.3, 0.1]
-beta = [1.9, 1.7, 1.5, 1.3, 1.1, 0.9, 0.7, 0.5, 0.3, 0.1]
+# scale = np.array([1,1,1])
+# alpha = [1.9, 1.7, 1.5, 1.3, 1.1, 0.9, 0.7, 0.5, 0.3, 0.1]
+# beta = [1.9, 1.7, 1.5, 1.3, 1.1, 0.9, 0.7, 0.5, 0.3, 0.1]
 
 
 # alpha = [0.1, 0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5, 1.7, 1.9]
@@ -65,53 +65,91 @@ beta = [1.9, 1.7, 1.5, 1.3, 1.1, 0.9, 0.7, 0.5, 0.3, 0.1]
 # beta = [0.1, 0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5, 1.7, 1.9]
 
 
-fig = make_subplots(
-    rows=len(alpha), cols=len(beta),
-    specs=[[{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
-           [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
-           [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
-           [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
-           [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
-           [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
-           [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
-           [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
-           [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
-           [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}]]
-    )
+# fig = make_subplots(
+#     rows=len(alpha), cols=len(beta),
+#     specs=[[{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
+#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
+#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
+#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
+#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
+#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
+#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
+#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
+#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
+#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}]]
+#     )
 
 
-for i in range(len(alpha)):
-    for j in range(len(beta)):
-        print(i, j)
-        superquadric = SuperQuadric(alpha[i], beta[j], scale)
-        x,y,z = superquadric.visualize()
-        fig.add_trace(
-            go.Mesh3d(
-                name = 'superquadric, alpha' + str(beta[i]) + str(alpha[j]),
-                showlegend=True,
-                x=x.flatten(), 
-                y=y.flatten(), 
-                z=z.flatten(), 
-                alphahull= 0, 
-                color=next(palette), 
-                opacity=0.70,
-                showscale= False),
-                row = i+1,
-                col = j+1)
+# for i in range(len(alpha)):
+#     for j in range(len(beta)):
+#         print(i, j)
+#         superquadric = SuperQuadric(alpha[i], beta[j], scale)
+#         x,y,z = superquadric.visualize()
+#         fig.add_trace(
+#             go.Mesh3d(
+#                 name = 'superquadric, alpha' + str(beta[i]) + str(alpha[j]),
+#                 showlegend=True,
+#                 x=x.flatten(), 
+#                 y=y.flatten(), 
+#                 z=z.flatten(), 
+#                 alphahull= 0, 
+#                 color=next(palette), 
+#                 opacity=0.70,
+#                 showscale= False),
+#                 row = i+1,
+#                 col = j+1)
 
-fig.update_yaxes(secondary_y=False, showgrid=False)
+# fig.update_yaxes(secondary_y=False, showgrid=False)
+# # fig.update_yaxes(secondary_y=True, showgrid=False)
+# fig.update_scenes(
+#     xaxis_visible=False, 
+#     yaxis_visible=False,
+#     zaxis_visible=False,
+# )
+
+# fig.update_layout(
+#     plot_bgcolor="white",
+#     paper_bgcolor="white",
+#     title_text='3D subplots with different colorscales',
+#     height=1200,
+#     width=1200)
+
+# fig.show()
+
+
+
+alpha = 1
+beta = 0.1
+scale = np.array([1,1,1])
+
+fig = go.Figure()
+superquadric = SuperQuadric(alpha, beta, scale)
+x,y,z = superquadric.visualize()
+fig.add_trace(
+    go.Mesh3d(
+        name = 'superquadric, alpha' + str(beta) + str(alpha),
+        showlegend=True,
+        x=x.flatten(), 
+        y=y.flatten(), 
+        z=z.flatten(), 
+        alphahull= 0, 
+        color=next(palette), 
+        opacity=0.70,
+        showscale= False))
+
+# fig.update_yaxes(secondary_y=False, showgrid=False)
 # fig.update_yaxes(secondary_y=True, showgrid=False)
-fig.update_scenes(
-    xaxis_visible=False, 
-    yaxis_visible=False,
-    zaxis_visible=False,
-)
+# fig.update_scenes(
+#     xaxis_visible=False, 
+#     yaxis_visible=False,
+#     zaxis_visible=False,
+# )
 
-fig.update_layout(
-    plot_bgcolor="white",
-    paper_bgcolor="white",
-    title_text='3D subplots with different colorscales',
-    height=1200,
-    width=1200)
+# fig.update_layout(
+#     plot_bgcolor="white",
+#     paper_bgcolor="white",
+#     title_text='3D subplots with different colorscales',
+#     height=1200,
+#     width=1200)
 
 fig.show()

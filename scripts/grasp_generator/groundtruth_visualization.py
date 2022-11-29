@@ -6,13 +6,39 @@ import rospy
 # Utils
 from grasp_generator.utils.standard_functions import (
     load_pointcloud,
-    filter_full_pointcloud, 
-    accuracy_overlap)
+    filter_full_pointcloud
+    )
 
 # Libaries
 import numpy as np
 import rospkg
 import pdb
+
+
+def accuracy_overlap(pointcloud_gt, ground_truth, partial_pointcloud, partial_pointcloud_color):
+    tree = KDTree(pointcloud_gt)
+    dist, ids = tree.query(partial_pointcloud, k=1)
+    tp, fp, tn, fn = [], [], [], []
+    accuracy = []
+
+    for idx_color, color in enumerate(partial_pointcloud_color):
+        if color == 0: 
+            if color == ground_truth[ids[idx_color]]:
+                tp.append(True)         # the predicted value is black, and it should be black
+            else:
+                fp.append(True)         # the predicted value is black, but it should have been red
+        elif color == 1: 
+            if color == ground_truth[ids[idx_color]]:
+                tn.append(True)         # the predicted value is red, and it should be red
+            else: 
+                fn.append(True)         # the predicted value is red, but it should be black
+
+    accuracy = float(sum(tp)+sum(tn))/len(partial_pointcloud_color)
+    true_positive_rate = float(sum(tp))/(sum(tp)+sum(fp))
+    print("Accuracy = " + str(accuracy*100) + "%")
+    print("True positive rate = " + str(true_positive_rate*100) + "%")
+    return accuracy, true_positive_rate
+
 
 class Main:
     def __init__(

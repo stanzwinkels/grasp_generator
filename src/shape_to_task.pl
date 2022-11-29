@@ -4,7 +4,7 @@
 % module definition and public (externally visible) predicates
 :- module(shape_to_task,
     [
-        task_prim/2,
+        task_prim/3,
         primitive_values/4
     ]).
 
@@ -15,88 +15,141 @@
 :- use_module(library('semweb/rdf_db')).
 
 :- rdf_meta
-    task_prim(+,r),
+    task_prim(+,r,r),
     primitive_values(+,+,+,+).
 
 
-task_prim(ID, pap:'Bake') :-
-    primitive_values(ID_pan, _, Dim_pan, _),
-    hard_condition_min(Dim_pan, [0.04, 0.04, 0.04]),
-    
+task_prim(ID, Surface, pap:'Cook') :-
+    primitive_values(ID_pan, Eps_pan, Dim_pan, _),
+    hard_condition_min(Dim_pan, [0.02, 0.02, 0.02]),
+    soft_condition_min(Dim_pan, 0.10),
+    shape_identification(Eps_pan, cylindrical), 
+    max_shape_difference(Dim_pan, 2),
+
     primitive_values(ID, Eps, Dim, _), 
+    min_shape_difference(Dim, 1.5),                
     soft_condition_min(Dim, 0.04),
-    min_shape_difference(Dim, 3),                
     shape_identification(Eps, cylindrical), 
-    ID \= ID_pan.
+    ID \= ID_pan,
+    Surface = 'Round'.
+
+task_prim(ID, Surface, pap:'Pour'):- 
+    primitive_values(ID, Eps, Dim, _),  
+    max_shape(ID),
+    min_shape_difference
+    min_shape_difference(Dim, 2),
+    hard_condition_min(Dim, [0.03, 0.03, 0.03]),
+    soft_condition_max(Dim, 0.05),      % there is at least on that is smaller than 7 cm
+    soft_condition_min(Dim, 0.06),      % ther is at least on that is bigger
+    shape_identification(Eps, cylindrical),
+    Surface = 'Round'. 
     
-    % 2 objects (Handle - Pan)
-    % Handle: (Thin, Long, cylindrical)
-    % Pan: (Big, Squared)
+    % Requires to be the largest shape of all as well.... 
+
+    % Requires a cylindrically shaped object of certain dimension
+    % Nothing above or under the main cylindrical
 
 
-task_prim(ID, pap:'Hammer') :- 
+
+
+task_prim(ID, Surface, pap:'Hammer') :-
     primitive_values(ID_tool, _, Dim_tool, _),
     max_shape_difference(Dim_tool, 4),
-
     primitive_values(ID, _, Dim, _),
-    hard_condition_min(Dim, [0.005, 0.005, 0.005]),  
+    hard_condition_min(Dim, [0.05, 0.05, 0.05]),  
     max_shape(ID), 
     min_shape_difference(Dim, 2),
     ID_tool \= ID.
 
-    % 2 objects (tool - handle) 
-    % Tool: (rectangular, squared)
-    % Handle: (Long, thin, cylindrical, bigger then tool),
+
+task_prim(ID, Surface, pap:'Placement') :-
+    primitive_values(ID, Eps, Dim, _),
+    max_shape(ID),
+    Surface = 'Flat'.
+
+        
+
+% % Here we create rules of what we expect the object to have for features. 
+% task_prim(ID, pap:'Cook') :-
+%     primitive_values(ID_pan, Eps_pan, Dim_pan, _),
+%     hard_condition_min(Dim_pan, [0.04, 0.04, 0.04]),
+%     soft_condition_min(Dim_pan, 0.10),
+%     min_shape_difference(Dim, 2),
+%     shape_identification(Eps_pan, cylindrical), 
+
+%     primitive_values(ID, Eps, Dim, _), 
+%     soft_condition_min(Dim, 0.04),
+%     min_shape_difference(Dim, 2),                
+%     shape_identification(Eps, cylindrical), 
+%     ID \= ID_pan.
+
+%     % volume(ID > ID_pan) volume pan bigger than handle!
+%     % Requires a pan shaped object
+%     % cooking pan and baking pan. 
 
 
-task_prim(ID, pap:'Pour') :- 
-    primitive_values(ID, Eps, Dim, _),  
-    max_shape(ID), 
-    min_shape_difference(Dim, 2),
-    hard_condition_min(Dim, [0.02, 0.2, 0.02]),
-    soft_condition_min(Dim, 0.04), 
-    shape_identification(Eps, cylindrical). 
-    % Different objects (Mug - Bottle)
-    % Bottle consists of 2 parts (cap - body)
-        % cap (small, cubical)
-        % body (long, biggest)
-    % Mug consists of 2 parts (handle - body)
-        % handle (small, cubical)
-        % body (biggest, cubical)
+% task_prim(ID, pap:'PourIn') :-
+%     primitive_values(ID, Eps, Dim, _),  
+%     max_shape(ID), 
+%     min_shape_difference(Dim, 2),
+%     hard_condition_min(Dim, [0.02, 0.02, 0.02]),
+%     soft_condition_min(Dim, 0.04), 
+%     shape_identification(Eps, cylindrical). 
+%     % Requires to be the largest shape of all as well.... 
 
-task_prim(ID, pap:'Handover') :-
-    primitive_values(ID, _, _, _),
-    min_shape(ID).
+%     % Requires a cylindrically shaped object of certain dimension
+%     % Nothing above or under the main cylindrical
+
+% task_prim(ID, pap:'PourOut') :-
+%     primitive_values(ID, Eps, Dim, _),  
+%     max_shape(ID), 
+%     min_shape_difference(Dim, 2),
+%     hard_condition_min(Dim, [0.02, 0.02, 0.02]),
+%     soft_condition_min(Dim, 0.04), 
+%     shape_identification(Eps, cylindrical). 
+%     % Requires cylindrical shaped object
+
+%     % no smaller component on top.... 
     
-    % Always prefers the smallest part for grasping. 
 
 
-% environment(ID, 'Shelf') :- 
-    % prefer a grasp at the top. 
-    % for a hammer grasp at the handle. 
+% task_prim(ID, pap:'Scoop') :-
+%     primitive_values(ID_tool, _, Dim_tool, _),
+%     max_shape_difference(Dim_tool, 1.5),
+%     hard_condition_min(Dim, [0.02, 0.02, 0.02]),
+%     %     shape_identification(Eps, spherical),
+%     primitive_values(ID, _, Dim, _),  
+%     min_shape_difference(Dim, 4),
+%     ID \= ID_tool.
+%     % Spherically shaped object
+%     % Requires a handle as well
+
+
+% task_prim(ID, pap:'Hammer') :-
+%     primitive_values(ID_tool, _, Dim_tool, _),
+%     max_shape_difference(Dim_tool, 4),
+%     primitive_values(ID, _, Dim, _),
+%     hard_condition_min(Dim, [0.05, 0.05, 0.05]),  
+%     max_shape(ID), 
+%     min_shape_difference(Dim, 2),
+%     ID_tool \= ID.
+    % Head and handle
+
+
+% task_prim(ID, pap:'HandOver') :-
+%     primitive_values(ID_tool, _, Dim_tool, _).
+%     % Grasp anything except the big component. 
 
 
 
+% % The advantage is that we can further specify certain rules for more specific scenario's
+% % Compared to affodance, it would require a different setup to create such a rules. 
+
+% task_prim(ID, pap:'Cook a salmon') :-
+%     task_prim(ID, pap:'Cook'),
+%     % additional constraint
+
+% task_prim(ID, pap:'Cook an egg') :-
 
 
-% task_prim(ID, pap:'Scoop')
-
-% task(Task, 'Scoop')
-%     primitive_values(ID, EPS, Shape, Pos),
-%     hard_condition_min(Shape, [0.01, 0.01, 0.01]),
-%     hard_condition_max(Shape, [0.1, 0.1, 0.1]),
-%     soft_condition_min(Shape, 0.025),
-%     soft_condition_max(Shape, 0.025),    
-%     shape_identification(EPS, rectangular),
-
-%     primitive_values(ID, EPS, Shape, Pos),
-%     shape_identification(EPS, spherical),
-%     max_shape_difference(1.5, Shape_body),
-
-%     % grasp the long pointy handle
-%     % A scoup contains usually a cylindrical type of object. 
-%     % Both components are parallel, one dimensions is almost zero.
-
-% task(Task, 'Wrench')
-%     % A thin object with a nudge. 
-%     %  Grasp it in the middle. 
+% task_prim(ID, pap:'PourIn a liter') :-

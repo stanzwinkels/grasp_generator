@@ -6,7 +6,6 @@ from grasp_generator.tools_superquadric.single_superquadric_generation import EM
 from sklearn.cluster import DBSCAN
 
 def fixed_nr_ems(
-
     point,
     OutlierRatio = 0.9,             # prior outlier probability [0, 1) (default: 0.1)
     MaxIterationEM = 20,            # maximum number of EM iterations (default: 20)

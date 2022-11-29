@@ -92,11 +92,11 @@ class Main:
             map_orientation_to_product = Quaternion(map_pose_to_product.orientation.w, map_pose_to_product.orientation.x, map_pose_to_product.orientation.y, map_pose_to_product.orientation.z)
             map_position_to_product = [map_pose_to_product.position.x, map_pose_to_product.position.y, map_pose_to_product.position.z]
         
+
             # 2. Camera frame --> Product frame
             tf_buffer = tf2_ros.Buffer()
             tf2_listener = tf2_ros.TransformListener(tf_buffer)
             cam_object_transform = tf_buffer.lookup_transform("xtion_rgb_optical_frame", "product_type", rospy.Time(0), rospy.Duration(10))            
-            
             camera_position_to_product = [cam_object_transform.transform.translation.x, cam_object_transform.transform.translation.y, cam_object_transform.transform.translation.z]
             camera_orientation_to_product = Quaternion(cam_object_transform.transform.rotation.w, cam_object_transform.transform.rotation.x, cam_object_transform.transform.rotation.y, cam_object_transform.transform.rotation.z)
             product_orientation_to_camera = camera_orientation_to_product.inverse
@@ -105,7 +105,6 @@ class Main:
             map_pose_to_camera = tf_buffer.lookup_transform("map", "xtion_rgb_optical_frame", rospy.Time(0), rospy.Duration(10))            
             map_position_to_camera = [map_pose_to_camera.transform.translation.x, map_pose_to_camera.transform.translation.y, map_pose_to_camera.transform.translation.z]
             map_orientation_to_camera = Quaternion(map_pose_to_camera.transform.rotation.w, map_pose_to_camera.transform.rotation.x, map_pose_to_camera.transform.rotation.y, map_pose_to_camera.transform.rotation.z)
-      
             # 4. Transform perceived partial-pointcloud to origin (0.0.0)
             new_pointcloud = []
             org_cam_partial_pointcloud = partial_pointcloud - camera_position_to_product
@@ -136,12 +135,12 @@ class Main:
                 csv_product_orientation_camera = {saved_name: product_orientation_to_camera1}
                 csv_camera_position_product  = {saved_name: camera_position_to_product}
 
-                save_data(self.package_path + "/data/test_data/"+ self.product +"/map_orientation_product.json", csv_map_orientation_product)
-                save_data(self.package_path + "/data/test_data/"+ self.product +"/map_position_product.json", csv_map_position_product)
-                save_data(self.package_path + "/data/test_data/"+ self.product +"/map_orientation_camera.json", csv_map_orientation_camera)
-                save_data(self.package_path + "/data/test_data/"+ self.product +"/map_position_camera.json", csv_map_position_camera)
-                save_data(self.package_path + "/data/test_data/"+ self.product +"/product_orientation_camera.json", csv_product_orientation_camera)
-                save_data(self.package_path + "/data/test_data/"+ self.product +"/camera_position_product.json", csv_camera_position_product)
+                save_data(self.package_path + "/data/test_data/map_orientation_product.json", csv_map_orientation_product)
+                save_data(self.package_path + "/data/test_data/map_position_product.json", csv_map_position_product)
+                save_data(self.package_path + "/data/test_data/map_orientation_camera.json", csv_map_orientation_camera)
+                save_data(self.package_path + "/data/test_data/map_position_camera.json", csv_map_position_camera)
+                save_data(self.package_path + "/data/test_data/product_orientation_camera.json", csv_product_orientation_camera)
+                save_data(self.package_path + "/data/test_data/camera_position_product.json", csv_camera_position_product)
 
             logask = raw_input(" ----- ROTATE OBJECT!? (y/n): ------")
             if logask == 'y': 

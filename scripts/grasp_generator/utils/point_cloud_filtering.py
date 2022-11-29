@@ -24,8 +24,8 @@ def point_cloud_filter(point_cloud_raw, debug):
     point_cloud = o3d.geometry.PointCloud()
     point_cloud.points = o3d.utility.Vector3dVector(np.array(point_cloud_xyz))
 
-    if debug:
-        o3d.visualization.draw_geometries([point_cloud])
+    # if debug:
+    #     o3d.visualization.draw_geometries([point_cloud])
 
     # 1. crop area perceived pointcloud
     lb = point_cloud.get_min_bound()
@@ -41,8 +41,8 @@ def point_cloud_filter(point_cloud_raw, debug):
 
     box = o3d.geometry.AxisAlignedBoundingBox(min_bound, max_bound)
     point_cloud = point_cloud.crop(box)
-    if debug:
-        o3d.visualization.draw_geometries([point_cloud])
+    # if debug:
+    #     o3d.visualization.draw_geometries([point_cloud])
 
     # 2. remove table perceived pointcloud
     plane_model, inliers = point_cloud.segment_plane(
@@ -68,7 +68,7 @@ def point_cloud_filter(point_cloud_raw, debug):
         alpha = rospy.get_param('mesh/alpha')
         tetra_mesh, pt_map = o3d.geometry.TetraMesh.create_from_point_cloud(object_cloud)
         object_mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_alpha_shape(
-            object_cloud, alpha, tetra_mesh, pt_map
+            object_cloud, 0.25, tetra_mesh, pt_map
         )
         if debug:
             o3d.visualization.draw_geometries([object_mesh])
