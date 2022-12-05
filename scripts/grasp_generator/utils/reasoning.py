@@ -48,14 +48,16 @@ class PrologFunctionTask():
                                 words = result.split()
                                 wordlist.extend(words)
                                 for word in wordlist:
-                                        found_task = re.findall(r"'(.*?)'", word, re.DOTALL)
-                                        if found_task[0] == task:
+                                        try:
+                                                found_task = str(word)
+                                        except:
+                                                found_task = re.findall(r"'(.*?)'", word, re.DOTALL)[0]
+                                        if found_task == task:
                                                 print("TASK FOUND")
                                                 Id = int(results[2::3][idx])
                                                 region = results[::3][idx]
                                                 break
-                except ValueError as error:
-                        print("Error occured: ", error.args)
+                except:
                         Id = 1
                         region = 'All'
                 return Id, region, forms[3-3::3]

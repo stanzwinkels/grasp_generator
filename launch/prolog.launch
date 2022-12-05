@@ -25,6 +25,7 @@
   <!-- servers for performing the pipeline -->
   <rosparam file="$(find grasp_generator)/config/multi_quadric.yaml" />
   <node name="multiquadric_server" pkg="grasp_generator" type="multiquadric_server.py" cwd="node" output="screen" />
+  <node name="semantic_server" pkg="grasp_generator" type="semantic_server.py" cwd="node" output="screen" />
 
 
 </launch>

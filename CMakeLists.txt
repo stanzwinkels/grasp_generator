@@ -40,6 +40,8 @@ add_service_files(FILES
                   DetectGrasps.srv
                   PoseAruco.srv
                   QuadricDetect.srv
+                  Semantic.srv
+
                   )
 
 ## Generate actions in the 'action' folder

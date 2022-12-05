@@ -21,6 +21,18 @@ from geometry_msgs.msg import Pose, PoseStamped, Point32
 from tf.transformations import quaternion_multiply, quaternion_conjugate, quaternion_from_matrix
 
 
+def save_to_excel(file,object_name, df):
+    book = load_workbook(file)
+    writer = ExcelWriter(file, engine='openpyxl')
+    writer.book = book
+    writer.sheets = {ws.title: ws for ws in book.worksheets}
+    try:
+        df.to_excel(writer, sheet_name=object_name, startrow=writer.sheets[object_name].max_row, index = False,header= False)
+    except: 
+        df.to_excel(writer, sheet_name=object_name, index = False,header= False)
+    writer.save()
+
+
 def region_cylinder(dimension, position, quaternion, region, superquadrics, Id): 
     """Create a simple cylinder from the superquadric dimensions in the correct orientation
             Addition: Based on the reasoner define which regions are suited to grasp!"""
@@ -144,18 +156,15 @@ def cube_segmentation(dim, origin, quaternion):
     mesh_yz_neg = rotate_points_X_Y_Z(-dim[0]*np.ones(len(yz_y_mesh_grid.flatten())), yz_y_mesh_grid.flatten(), yz_z_mesh_grid.flatten(), quaternion)+origin
     return mesh_xy, mesh_xz, mesh_yz, mesh_xy_neg, mesh_xz_neg, mesh_yz_neg
 
-
-
 def cylinder_reasoning(EPS, DIM):
     for idx, eps in enumerate(EPS):
         if eps[0] > eps[1]: 
-            # height = dim[1]
-            # diameters = dim[0], dim[2]]
-            DIM[idx] = np.array([DIM[idx, 0], DIM[idx,2], DIM[idx,1]])
-        else: 
-            # height = dim[2]
-            # diameters = [dim[0], dim[1]]
-            DIM[idx] = np.array([DIM[idx,0], DIM[idx,1], DIM[idx,2]])
+            DIM[idx] = np.array([DIM[idx, 2], DIM[idx,1], DIM[idx,0]])
+        elif eps[0] < eps[1]:
+            if eps[1] > 1 and eps[0]>0.6:
+                DIM[idx] = np.array([DIM[idx, 0], DIM[idx,2], DIM[idx,1]])
+            else: 
+                DIM[idx] = np.array([DIM[idx,0], DIM[idx,1], DIM[idx,2]])
     return DIM
 
 
