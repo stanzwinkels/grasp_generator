@@ -16,14 +16,14 @@ palette2 = cycle(['black', 'red', 'green'])
 
 
 class SingleSuperQuadric():
-    def __init__(self, eps, dimension, translation, quaternions):
-        self.alpha = eps[:,0]
-        self.beta = eps[:,1]
-        self.x = dimension[:,0]
-        self.y = dimension[:,1]
-        self.z = dimension[:,2]
-        self.translation = translation
-        self.quaternions = quaternions
+    def __init__(self, superquadrics):        
+        self.alpha = superquadrics[:, 0]
+        self.beta = superquadrics[:, 1]
+        self.x = superquadrics[:, 2]
+        self.y = superquadrics[:, 3]
+        self.z = superquadrics[:, 4]
+        self.translation = superquadrics[:, 9:12]
+        self.quaternions = superquadrics[:, 5:9]
 
     def fexp(self, x,p):
         """a different kind of exponentiation"""

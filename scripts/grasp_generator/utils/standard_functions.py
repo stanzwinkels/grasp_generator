@@ -33,18 +33,20 @@ def save_to_excel(file,object_name, df):
     writer.save()
 
 
-def region_cylinder(dimension, position, quaternion, region, superquadrics, Id): 
+def region_cylinder(superquadric, region, superquadrics, shape_Id): 
     """Create a simple cylinder from the superquadric dimensions in the correct orientation
             Addition: Based on the reasoner define which regions are suited to grasp!"""
-    
-    quaternion = Quaternion(quaternion[3], quaternion[0],quaternion[1],quaternion[2])
+    region = 'Flat'
 
-    t = np.arange(0, 2*np.pi, 0.1)              # default 0.1: how many steps in a circle
+    translation = superquadric[9:12]
+    quaternion = Quaternion(superquadric[8], superquadric[5],superquadric[6],superquadric[7])
+    dim_quaternion, dimension = cylinder_reasoning(superquadric)
+
+    # cylindrical tops and bottom
+    t = np.arange(0, 2*np.pi, 0.1)              
     x_dim = np.linspace(0, dimension[0], 10)    
     y_dim = np.linspace(0, dimension[1], 10)
-
-    X_coord = np.array([])
-    Y_coord = np.array([])
+    X_coord, Y_coord = np.array([]), np.array([])
     for i in range(len(x_dim)): 
         X_coord = np.append(X_coord, x_dim[i]*np.cos(t))
         Y_coord = np.append(Y_coord, y_dim[i]*np.sin(t))
@@ -52,30 +54,26 @@ def region_cylinder(dimension, position, quaternion, region, superquadrics, Id):
     disk_top = np.array([X_coord, Y_coord, z])
     disk_bottom = np.array([X_coord, Y_coord, -z])
 
-
+    # cylindrical surface
     z_dim = np.arange(-dimension[2]*0.98, dimension[2]*0.98, 0.001)
-    x_outside = np.array([])
-    y_outside = np.array([])
-    z_outside = np.array([])
+    x_outside, y_outside, z_outside = np.array([]), np.array([]), np.array([])
     for i in range(len(z_dim)): 
         x_outside = np.append(x_outside, x_dim[-1]*np.cos(t))
         y_outside = np.append(y_outside, y_dim[-1]*np.sin(t))
         z_outside = np.append(z_outside, np.full(len(t), z_dim[i]))
     disk_surface = np.array([x_outside, y_outside, z_outside])
 
+
     new_disk_top = np.empty((len(disk_top[0]),3))
     new_disk_bottom = np.empty((len(disk_bottom[0]),3))
     new_disk_surface = np.empty((len(disk_surface[0]),3))
-
+    new_quaternion = Quaternion.__mul__(quaternion,dim_quaternion)
     for idx, _ in enumerate(disk_top[0]): 
-        new_disk_top[idx] = (quaternion.rotate(np.array([disk_top[0,idx],disk_top[1,idx],disk_top[2,idx]])))+position
-
+        new_disk_top[idx] = new_quaternion.rotate(disk_top[:,idx])+translation
     for idx, _ in enumerate(disk_bottom[0]): 
-        new_disk_bottom[idx] = (quaternion.rotate(np.array([disk_bottom[0,idx],disk_bottom[1,idx],disk_bottom[2,idx]])))+position
-
+        new_disk_bottom[idx] = new_quaternion.rotate(disk_bottom[:,idx])+translation
     for idx, _ in enumerate(disk_surface[0]): 
-        new_disk_surface[idx] = (quaternion.rotate(np.array([disk_surface[0,idx],disk_surface[1,idx],disk_surface[2,idx]]))) + position
-
+        new_disk_surface[idx] = new_quaternion.rotate(disk_surface[:,idx]) + translation
 
 
     if region == "All":
@@ -88,18 +86,16 @@ def region_cylinder(dimension, position, quaternion, region, superquadrics, Id):
         bottom_grasp = True
         top_grasp = True
         if len(superquadrics) > 1:
-            # check all the other shapes with this shape....
-            reference_dim = superquadrics[Id-1, 2:5]
-            reference_quat = Quaternion(superquadrics[Id-1, 5:9][3], superquadrics[Id-1, 5:9][0], superquadrics[Id-1, 5:9][1], superquadrics[Id-1, 5:9][2])
-            reference_quat = reference_quat.inverse
-            reference_pos = superquadrics[Id-1, 9:12]
+            reference_dim = dimension
+            reference_quat = new_quaternion.inverse
+            reference_pos = translation
 
-            for j in [x for x in range(len(superquadrics)) if x != (Id-1)]:
+            for j in [x for x in range(len(superquadrics)) if x != (shape_Id-1)]:
                 compare_pos = superquadrics[j, 9:12]                
                 point = reference_pos - compare_pos
                 new_center = reference_quat.rotate(point)
-                value = (new_center[0]**2/reference_dim[0]**2) + (new_center[1]**2/reference_dim[1]**2) - 1
 
+                value = (new_center[0]**2/reference_dim[0]**2) + (new_center[1]**2/reference_dim[1]**2) - 1
                 if value < 1 and reference_dim[2]*0.5 < new_center[2]: 
                     bottom_grasp = False
                     print("TOP GRASP NOT POSSIBLE")
@@ -156,16 +152,25 @@ def cube_segmentation(dim, origin, quaternion):
     mesh_yz_neg = rotate_points_X_Y_Z(-dim[0]*np.ones(len(yz_y_mesh_grid.flatten())), yz_y_mesh_grid.flatten(), yz_z_mesh_grid.flatten(), quaternion)+origin
     return mesh_xy, mesh_xz, mesh_yz, mesh_xy_neg, mesh_xz_neg, mesh_yz_neg
 
-def cylinder_reasoning(EPS, DIM):
-    for idx, eps in enumerate(EPS):
-        if eps[0] > eps[1]: 
-            DIM[idx] = np.array([DIM[idx, 2], DIM[idx,1], DIM[idx,0]])
-        elif eps[0] < eps[1]:
-            if eps[1] > 1 and eps[0]>0.6:
-                DIM[idx] = np.array([DIM[idx, 0], DIM[idx,2], DIM[idx,1]])
-            else: 
-                DIM[idx] = np.array([DIM[idx,0], DIM[idx,1], DIM[idx,2]])
-    return DIM
+def cylinder_reasoning(superquadrics):
+    """
+    Switch the dimensions (x,y,z) depending on recovered parameters eps1 and eps2.
+    """
+    eps = superquadrics[:2]
+    dim = superquadrics[2:5]
+    if eps[0] > eps[1]: 
+        new_dim = np.array([dim[2], dim[1], dim[0]])
+        dim_quaternion = Quaternion([1,0,1,0])
+
+    elif eps[0] < eps[1]:
+        if eps[1] > 1 and eps[0]>0.55:
+            new_dim = np.array([dim[0], dim[2], dim[1]])
+            dim_quaternion = Quaternion([1,1,0,0])
+
+        else: 
+            new_dim = np.array([dim[0], dim[1], dim[2]])
+            dim_quaternion = Quaternion([1,0,0,0])
+    return dim_quaternion, new_dim
 
 
 def create_dict(list_values): 

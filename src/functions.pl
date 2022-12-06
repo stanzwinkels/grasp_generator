@@ -22,39 +22,39 @@
         shape_identification/2,
         flatten/3, 
         roundD/3
-        % primitive_values/4
+        % primitive_values/5
 
     ]).
 
 :- use_module(library('semweb/rdfs')).
 :- use_module(library('semweb/rdf_db')).
 
-% :- dynamic primitive_values/4. 
+% :- dynamic primitive_values/5. 
 
 % :- rdf_meta
-%     primitive_values(+,+,+,+). 
+%     primitive_values(+,+,+,+,+). 
 
 
 max_shape(ID) :- 
     findall(V, 
-        (primitive_values(_,_,Shape0,_), 
+        (primitive_values(_,_,Shape0,_,_), 
         volume3(Shape0, V)), 
             Elements),
     max_list(Elements, Max_value),
     roundD(Max_value, Max_Round), 
-    primitive_values(ID,_,Shape,_),
+    primitive_values(ID,_,Shape,_,_),
     volume3(Shape, Vol), 
     roundD(Vol, Vol_round),
     Max_Round == Vol_round.
 
 min_shape(ID) :- 
     findall(V, 
-        (primitive_values(_,_,Shape0,_), 
+        (primitive_values(_,_,Shape0,_,_), 
         volume3(Shape0, V)), 
             Elements),
     min_list(Elements, Max_value),
     roundD(Max_value, Max_Round), 
-    primitive_values(ID,_,Shape,_),
+    primitive_values(ID,_,Shape,_,_),
     volume3(Shape, Vol), 
     roundD(Vol, Vol_round),
     Max_Round == Vol_round.
@@ -140,7 +140,7 @@ max_volume(Lists, ID) :-
         volume3(RList, Volume)), 
         Volume), 
     max_list(Volume, Max_volume),
-    primitive_values(ID,_,Shape,_),
+    primitive_values(ID,_,Shape,_,_),
     roundlist(Shape, RShape),
     volume3(RShape, Volume), 
     Volume == Max_volume. 

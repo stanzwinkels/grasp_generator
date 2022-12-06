@@ -20,29 +20,27 @@ class PrologFunctionTask():
         def feedback(self):
                 print("do")
         
-        def shape_selection(self, superquadrics, product, task):
+        def shape_selection(self, superquadrics, product, task, semantic_shapes):
                 task = 'Wgrasp'
-                
                 pap = "http://www.semanticweb.org/stanz/primitive-ontol#"
                 pq = PrologQuery()
 
                 if self.load:
-                        pq.prolog_query("retractall(shape_to_function_to_task:primitive_values(ID,Shape,Scale,Pos)).")      # clear loaded primitives
+                        pq.prolog_query("retractall(shape_to_function_to_task:primitive_values(ID,Shape,Scale,Pos,Semantic_shape)).")      # clear loaded primitives
                         for id, superquadric in enumerate(superquadrics): 
                                 shape = superquadric[0:2]
                                 scale = superquadric[2:5]*2
                                 pos = superquadric[9:12]
-                                pq.prolog_query("assert(shape_to_function_to_task:primitive_values("+ str(id+1) +", "+str(list(shape))+", "+ str(list(scale)) +", "+ str(list(pos)) +")).")
-                
+                                pq.prolog_query("assert(shape_to_function_to_task:primitive_values("+ str(id+1) +", "+str(list(shape))+", "+ str(list(scale)) +", "+ str(list(pos))+", "+ str(semantic_shapes[id]) +")).")
+
                 query = pq.prolog_query("affordance(ID, Region, Affordance).")
                 results = pq.get_all_solutions(query)
 
-                query = pq.prolog_query("primitive_values(ID, Eps, _, _), shape_identification(Eps, Shape).")
-                forms = pq.get_all_solutions(query)
+                # query = pq.prolog_query("primitive_values(ID, Eps, _, _,_), shape_identification(Eps, Shape).")
+                # forms = pq.get_all_solutions(query)
                 try: 
                         if results[0] == 'false':
                                 raise ValueError("No feasible task found", results[0])
-
                         for idx, result in enumerate(results[1::3]):
                                 wordlist = []
                                 words = result.split()
@@ -53,22 +51,19 @@ class PrologFunctionTask():
                                         except:
                                                 found_task = re.findall(r"'(.*?)'", word, re.DOTALL)[0]
                                         if found_task == task:
-                                                print("TASK FOUND")
+                                                # print("TASK FOUND")
                                                 Id = int(results[2::3][idx])
                                                 region = results[::3][idx]
                                                 break
                 except:
                         Id = 1
                         region = 'All'
-                return Id, region, forms[3-3::3]
+                return Id, region
       
                 # query = pq.prolog_query("select_primitive('"+pap + product+"', '"+pap + task+"', ID, _).")
                 # print("select_primitive", pq.get_all_solutions(query))
                 # valid_primitives = pq.get_all_solutions(query)
                 # return ast.literal_eval(valid_primitives[0])
-
-
-
 
 
 class PrologShapeTask():
@@ -112,15 +107,7 @@ class PrologShapeTask():
                                                               
                 return ID, forms[3-3::3]
 
-# class PrologTask(): 
-#         def __init__(self):
-#                 self.pap = XX
-#         def feedback():
-        
-#         def shape_selection():
-        
-#         def task_validation():
-        
+
         
 
 
