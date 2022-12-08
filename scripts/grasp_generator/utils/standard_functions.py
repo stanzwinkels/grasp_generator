@@ -33,93 +33,97 @@ def save_to_excel(file,object_name, df):
     writer.save()
 
 
-def region_cylinder(superquadric, region, superquadrics, shape_Id): 
+def region_cylinder(regions, superquadrics, shape_Id): 
     """Create a simple cylinder from the superquadric dimensions in the correct orientation
             Addition: Based on the reasoner define which regions are suited to grasp!"""
-    region = 'Flat'
 
-    translation = superquadric[9:12]
-    quaternion = Quaternion(superquadric[8], superquadric[5],superquadric[6],superquadric[7])
-    dim_quaternion, dimension = cylinder_reasoning(superquadric)
+    grasp_labels = []
+    grasp_coordinates = []
+    for shape_index, shape in enumerate(shape_Id): 
+        superquadric = superquadrics[shape-1,:]
 
-    # cylindrical tops and bottom
-    t = np.arange(0, 2*np.pi, 0.1)              
-    x_dim = np.linspace(0, dimension[0], 10)    
-    y_dim = np.linspace(0, dimension[1], 10)
-    X_coord, Y_coord = np.array([]), np.array([])
-    for i in range(len(x_dim)): 
-        X_coord = np.append(X_coord, x_dim[i]*np.cos(t))
-        Y_coord = np.append(Y_coord, y_dim[i]*np.sin(t))
-    z = np.full(len(X_coord), dimension[2])
-    disk_top = np.array([X_coord, Y_coord, z])
-    disk_bottom = np.array([X_coord, Y_coord, -z])
+        translation = superquadric[9:12]
+        quaternion = Quaternion(superquadric[8], superquadric[5],superquadric[6],superquadric[7])
+        dim_quaternion, dimension = cylinder_reasoning(superquadric)
 
-    # cylindrical surface
-    z_dim = np.arange(-dimension[2]*0.98, dimension[2]*0.98, 0.001)
-    x_outside, y_outside, z_outside = np.array([]), np.array([]), np.array([])
-    for i in range(len(z_dim)): 
-        x_outside = np.append(x_outside, x_dim[-1]*np.cos(t))
-        y_outside = np.append(y_outside, y_dim[-1]*np.sin(t))
-        z_outside = np.append(z_outside, np.full(len(t), z_dim[i]))
-    disk_surface = np.array([x_outside, y_outside, z_outside])
+        # cylindrical tops and bottom
+        t = np.arange(0, 2*np.pi, 0.1)              
+        x_dim = np.linspace(0, dimension[0], 10)    
+        y_dim = np.linspace(0, dimension[1], 10)
+        X_coord, Y_coord = np.array([]), np.array([])
+        for i in range(len(x_dim)): 
+            X_coord = np.append(X_coord, x_dim[i]*np.cos(t))
+            Y_coord = np.append(Y_coord, y_dim[i]*np.sin(t))
+        z = np.full(len(X_coord), dimension[2])
+        disk_top = np.array([X_coord, Y_coord, z])
+        disk_bottom = np.array([X_coord, Y_coord, -z])
 
+        # cylindrical surface
+        z_dim = np.arange(-dimension[2]*0.98, dimension[2]*0.98, 0.001)
+        x_outside, y_outside, z_outside = np.array([]), np.array([]), np.array([])
+        for i in range(len(z_dim)): 
+            x_outside = np.append(x_outside, x_dim[-1]*np.cos(t))
+            y_outside = np.append(y_outside, y_dim[-1]*np.sin(t))
+            z_outside = np.append(z_outside, np.full(len(t), z_dim[i]))
+        disk_surface = np.array([x_outside, y_outside, z_outside])
 
-    new_disk_top = np.empty((len(disk_top[0]),3))
-    new_disk_bottom = np.empty((len(disk_bottom[0]),3))
-    new_disk_surface = np.empty((len(disk_surface[0]),3))
-    new_quaternion = Quaternion.__mul__(quaternion,dim_quaternion)
-    for idx, _ in enumerate(disk_top[0]): 
-        new_disk_top[idx] = new_quaternion.rotate(disk_top[:,idx])+translation
-    for idx, _ in enumerate(disk_bottom[0]): 
-        new_disk_bottom[idx] = new_quaternion.rotate(disk_bottom[:,idx])+translation
-    for idx, _ in enumerate(disk_surface[0]): 
-        new_disk_surface[idx] = new_quaternion.rotate(disk_surface[:,idx]) + translation
+        new_disk_top = np.empty((len(disk_top[0]),3))
+        new_disk_bottom = np.empty((len(disk_bottom[0]),3))
+        new_disk_surface = np.empty((len(disk_surface[0]),3))
+        new_quaternion = Quaternion.__mul__(quaternion,dim_quaternion)
+        for idx, _ in enumerate(disk_top[0]): 
+            new_disk_top[idx] = new_quaternion.rotate(disk_top[:,idx])+translation
+        for idx, _ in enumerate(disk_bottom[0]): 
+            new_disk_bottom[idx] = new_quaternion.rotate(disk_bottom[:,idx])+translation
+        for idx, _ in enumerate(disk_surface[0]): 
+            new_disk_surface[idx] = new_quaternion.rotate(disk_surface[:,idx]) + translation
 
+        if regions[shape_index] == "All":
+            label = np.array([True,True,True])       # top, bottom, surface
 
-    if region == "All":
-        label = np.array([True,True,True])       # top, bottom, surface
+        elif regions[shape_index] == "Round":
+            label = np.array([False,False,True])       # surface
 
-    elif region == "Round":
-        label = np.array([False,False,True])       # surface
+        elif regions[shape_index] == "Flat":
+            bottom_grasp = True
+            top_grasp = True
+            if len(superquadrics) > 1:
+                reference_dim = dimension
+                reference_quat = new_quaternion.inverse
+                reference_pos = translation
 
-    elif region == "Flat":
-        bottom_grasp = True
-        top_grasp = True
-        if len(superquadrics) > 1:
-            reference_dim = dimension
-            reference_quat = new_quaternion.inverse
-            reference_pos = translation
+                for j in [x for x in range(len(superquadrics)) if x != (shape-1)]:
+                    compare_pos = superquadrics[j, 9:12]                
+                    point = reference_pos - compare_pos
+                    new_center = reference_quat.rotate(point)
 
-            for j in [x for x in range(len(superquadrics)) if x != (shape_Id-1)]:
-                compare_pos = superquadrics[j, 9:12]                
-                point = reference_pos - compare_pos
-                new_center = reference_quat.rotate(point)
+                    value = (new_center[0]**2/reference_dim[0]**2) + (new_center[1]**2/reference_dim[1]**2) - 1
+                    if value < 1 and reference_dim[2]*0.5 < new_center[2]: 
+                        bottom_grasp = False
+                        print("TOP GRASP NOT POSSIBLE")
+                    elif value < 1 and new_center[2] < -reference_dim[2]*0.5:       # assumption that I make, a product has to be from the center half a dimension distance. otherwise it is a side object!
+                        top_grasp = False
+                        print("BOTTOM GRASP NOT POSSIBLE")
 
-                value = (new_center[0]**2/reference_dim[0]**2) + (new_center[1]**2/reference_dim[1]**2) - 1
-                if value < 1 and reference_dim[2]*0.5 < new_center[2]: 
-                    bottom_grasp = False
-                    print("TOP GRASP NOT POSSIBLE")
-                elif value < 1 and new_center[2] < -reference_dim[2]*0.5:       # assumption that I make, a product has to be from the center half a dimension distance. otherwise it is a side object!
-                    top_grasp = False
-                    print("BOTTOM GRASP NOT POSSIBLE")
+            if bottom_grasp and top_grasp: 
+                label = np.array([True,True,False])       # top, bottom, 
+                print("bottom yes, top yes")
 
-        if bottom_grasp and top_grasp: 
-            label = np.array([True,True,False])       # top, bottom, 
-            print("bottom yes, top yes")
+            elif not bottom_grasp and top_grasp: 
+                label = np.array([True,False,False])
+                print("bottom not, top yes")    # top
+                
+            elif bottom_grasp and not top_grasp: 
+                label = np.array([False,True,False])       # bottom
+                print("bottom yes, top not")
 
-        elif not bottom_grasp and top_grasp: 
-            label = np.array([True,False,False])
-            print("bottom not, top yes")    # top
-            
-        elif bottom_grasp and not top_grasp: 
-            label = np.array([False,True,False])       # bottom
-            print("bottom yes, top not")
+            elif not bottom_grasp and not top_grasp: 
+                label = np.array([False,False,False])
+                print("bottom not, top not")
 
-        elif not bottom_grasp and not top_grasp: 
-            label = np.array([False,False,False])
-            print("bottom not, top not")
-        
-    return np.array([new_disk_top, new_disk_bottom, new_disk_surface]), label
+        grasp_coordinates.append(np.array([new_disk_top, new_disk_bottom, new_disk_surface]))
+        grasp_labels.append(label)
+    return np.array(grasp_coordinates), np.array(grasp_labels)
 
 
 
@@ -163,7 +167,7 @@ def cylinder_reasoning(superquadrics):
         dim_quaternion = Quaternion([1,0,1,0])
 
     elif eps[0] < eps[1]:
-        if eps[1] > 1 and eps[0]>0.55:
+        if eps[1] > 1 and eps[0]>0.65:
             new_dim = np.array([dim[0], dim[2], dim[1]])
             dim_quaternion = Quaternion([1,1,0,0])
 
@@ -230,16 +234,19 @@ def save_pointcloud(pointcloud, product, location):
     return 
 
 
-def filter_full_pointcloud(pointcloud_gt, colors_gt): 
+def filter_full_pointcloud(pointcloud_gt, colors_gt):   
     black = np.array([0, 0 ,0])
     red = np.array([1,0,0])
+    green = np.array([0,1,0])
 
     ground_truth = np.empty(len(pointcloud_gt))
     for idx, color in enumerate(colors_gt):
         if (color == black).all():
-            ground_truth[idx] = 0
-        elif (color == red).all():
             ground_truth[idx] = 1
+        elif (color == red).all():
+            ground_truth[idx] = 2
+        elif (color == green).all():
+            ground_truth[idx] = 3
         else: 
             ground_truth[idx] = -1
     pointcloud_gt = pointcloud_gt[ground_truth >= 0]
@@ -272,18 +279,25 @@ def transform_partial_pointcloud_origin(package_path, partial_pointcloud, name):
     return origin_partial_pointcloud
 
 def accuracy_overlap_partial(pointcloud_gt, ground_truth, partial_pointcloud, partial_pointcloud_label):
+    
+    partial_pointcloud_label[partial_pointcloud_label != 0] = 1
+    
+    # desired_color = 'black = 1, red = 2, green = 3 '
+    ground_truth[ground_truth == 2] = 0
+    ground_truth[ground_truth >2] = 1
+    
     tree = KDTree(pointcloud_gt)
     dist, ids = tree.query(partial_pointcloud, k=1)
     tp, fp, tn, fn = [], [], [], []
     accuracy = []
     
     for idx_label, ID in enumerate(partial_pointcloud_label):
-        if ID == 1: 
+        if ID == 0: 
             if ID == ground_truth[ids[idx_label]]:
                 tp.append(True)         # the predicted value is black, and it should be black
             else:
                 fp.append(True)         # the predicted value is black, but it should have been red
-        elif ID == 0: 
+        else: 
             if ID == ground_truth[ids[idx_label]]:
                 tn.append(True)         # the predicted value is red, and it should be red
             else: 

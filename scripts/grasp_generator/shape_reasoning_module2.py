@@ -94,6 +94,9 @@ class Main:
         directory_product = package_path + "/data/test_data/"+object_name+"/"
 
         count = 1
+
+        resulting_scores = []
+
         for filename in os.listdir(directory_product):
             source = o3d.io.read_point_cloud(directory_product+filename)
             partial_pointcloud = np.asarray(source.points)
@@ -107,13 +110,10 @@ class Main:
                         
                 singlesuperquadric = SingleSuperQuadric(superquadrics)
                 superquadric_pointcloud = singlesuperquadric.coordinates()
-                visualize_superquadric(partial_pointcloud, superquadric_pointcloud)
+                # visualize_superquadric(partial_pointcloud, superquadric_pointcloud)
                 
                 semantic_classification = SemanticClient()
                 semantic_shape = semantic_classification.run(superquadrics[:,:5])
-
-                prolog_reasoning = PrologFunctionTask()
-                request_ID, grasp_region = prolog_reasoning.shape_selection(superquadrics, self.product, self.task, semantic_shape)
 
                 df = concat([DataFrame(semantic_shape), DataFrame(superquadrics)], axis=1)        
                 df = df.drop(columns=[5,6,7,8])
@@ -121,44 +121,32 @@ class Main:
                 df.insert(loc=0, column='Name', value=filename)
                 df = df.set_axis(['Name','semantic_shape','Shape0', 'Shape1', 'Dim1', 'Dim2', 'Dim3', 'Pos1', 'Pos2', 'Pos3'], axis=1, inplace=False)
                 print(df.to_string())
-                count += 1
 
-                if grasp_region == "All": 
-                    closest_primitive, distances = point_cloud_segmentation(superquadrics, partial_pointcloud)
-                    visualize_superquadric_segmentation(partial_pointcloud, superquadrics, closest_primitive)           
-                    origin_partial_pointcloud = transform_partial_pointcloud_origin(self.package_path, partial_pointcloud, filename)
-                    pointcloud_gt, ground_truth = filter_full_pointcloud(full_pointcloud, colors_gt) 
-                    closest_primitive[closest_primitive != request_ID] = 0 #undesired grasp area
-                    closest_primitive[closest_primitive == request_ID] = 1  #desired grasp area
-                    # ground_truth = np.logical_not(ground_truth).astype(int)         # reverse
-                    accuracy, true_positive_rate = accuracy_overlap_partial(pointcloud_gt, ground_truth, origin_partial_pointcloud, closest_primitive)
-                    visualize_gt_pred(pointcloud_gt, ground_truth, origin_partial_pointcloud, closest_primitive)
-                    visualize_pointclouds(origin_partial_pointcloud, pointcloud_gt)
-                        
+                prolog_reasoning = PrologFunctionTask()
+                request_ID, grasp_region = prolog_reasoning.shape_selection(superquadrics, self.product, self.task, semantic_shape)
 
-                if not (grasp_region == "All"): 
-                    # superquadrics[:, 2:5] = cylinder_reasoning(superquadrics)  # but also include rotation as well!    
+                origin_partial_pointcloud = transform_partial_pointcloud_origin(self.package_path, partial_pointcloud, filename)
+                pointcloud_gt, ground_truth = filter_full_pointcloud(full_pointcloud, colors_gt) 
 
-                    cylinder_pointsegmentation, label = region_cylinder(superquadrics[request_ID-1,:], grasp_region, superquadrics, request_ID)            
-                    visualize_superquadric_cylinder(partial_pointcloud, superquadric_pointcloud, cylinder_pointsegmentation)
-
-                    # closest_primitive, distances = point_cloud_segmentation_cylinder(superquadrics, partial_pointcloud, label, cylinder_pointsegmentation, request_ID)
-                    # visualize_superquadric_segmentation(partial_pointcloud, superquadric_pointcloud, closest_primitive)
-                    # visualize_superquadric_true_segmentation(partial_pointcloud, superquadric_pointcloud, closest_primitive)
-                    # origin_partial_pointcloud = transform_partial_pointcloud_origin(self.package_path, partial_pointcloud, filename)
+                if grasp_region[0] == "All": 
+                    pdb.set_trace()
+                    pointsegmentation, distances = point_cloud_segmentation(superquadrics, partial_pointcloud, request_ID)
+                    pdb.set_trace()
+                if not (grasp_region[0] == "All"): 
+                    cylinder_pointsegmentations, labels = region_cylinder(grasp_region, superquadrics, request_ID)            
+                    pointsegmentation, distances = point_cloud_segmentation_cylinder(superquadrics, partial_pointcloud, labels, cylinder_pointsegmentations, request_ID)
+                    visualize_superquadric_cylinder(partial_pointcloud, superquadric_pointcloud, cylinder_pointsegmentations)
                 
-                    # # 5. have ground truth of the full point cloud. 
-                    # pointcloud_gt, ground_truth = filter_full_pointcloud(full_pointcloud, colors_gt) 
-                    # closest_primitive[closest_primitive != request_ID] = 0 #undesired grasp area
-                    # closest_primitive[closest_primitive == request_ID] = 1  #desired grasp area
 
-                    # # ground_truth = np.logical_not(ground_truth).astype(int)         # reverse
-                    # accuracy, true_positive_rate = accuracy_overlap_partial(pointcloud_gt, ground_truth, origin_partial_pointcloud, closest_primitive)
-                    
-                    # # 6. visualize the ground truth and predicted pointcloud 
-                    # visualize_gt_pred(pointcloud_gt, ground_truth, origin_partial_pointcloud, closest_primitive)
-                    # visualize_pointclouds(origin_partial_pointcloud, pointcloud_gt)
-
+                # visualize_superquadric_true_segmentation(partial_pointcloud, superquadric_pointcloud, pointsegmentation)
+                # visualize_superquadric_segmentation(partial_pointcloud, superquadric_pointcloud, pointsegmentation)
+                # visualize_gt_pred(pointcloud_gt, ground_truth, origin_partial_pointcloud, pointsegmentation)
+                # visualize_pointclouds(origin_partial_pointcloud, pointcloud_gt)
+                
+                accuracy, true_positive_rate = accuracy_overlap_partial(pointcloud_gt, ground_truth, origin_partial_pointcloud, pointsegmentation)
+                resulting_scores.append([accuracy,true_positive_rate])
+                count += 1
+                pdb.set_trace()
 
             except: 
                 print("\n")
@@ -166,7 +154,11 @@ class Main:
                 print("\n")
                 count += 1
 
+            df_data = np.array(resulting_scores)
+            scores_df = DataFrame(df_data)
+            scores_df.to_csv('resulting_scores.csv', index=False)
 
+            
                 # singlesuperquadric = SingleSuperQuadric(superquadrics)
                 # superquadric_pointcloud = singlesuperquadric.coordinates()
                 # # visualize_superquadric(partial_pointcloud, superquadric_pointcloud)

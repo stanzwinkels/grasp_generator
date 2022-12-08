@@ -85,7 +85,7 @@ def visualize_superquadric(pointcloud, superquadrics):
     return
 
 
-def visualize_superquadric_cylinder(pointcloud, superquadrics, region):
+def visualize_superquadric_cylinder(pointcloud, superquadrics, regions):
     fig = go.Figure()
     for idx, superquadric in enumerate(superquadrics):        
         fig.add_trace(
@@ -105,12 +105,12 @@ def visualize_superquadric_cylinder(pointcloud, superquadrics, region):
             marker=dict(size=0.01, 
                         color='blue',
                         opacity=0.7)))
-                    
-    for points in region:
-        fig.add_trace(
-            go.Scatter3d(
-                x = points[:,0],y = points[:,1],z = points[:,2],
-                mode = 'markers'))
+    for region in regions:                
+        for points in region:
+            fig.add_trace(
+                go.Scatter3d(
+                    x = points[:,0],y = points[:,1],z = points[:,2],
+                    mode = 'markers'))
     fig.update_scenes(
         xaxis_visible=False, 
         yaxis_visible=False,
@@ -187,7 +187,6 @@ def visualize_superquadric_true_segmentation(pointcloud, superquadrics, closest_
                 color=next(palette),
                 opacity=0.50))
 
-
     fig.add_trace(
         go.Scatter3d(
             name = 'pointcloud',
@@ -200,21 +199,20 @@ def visualize_superquadric_true_segmentation(pointcloud, superquadrics, closest_
                         color='red',
                         opacity=0.7)))
 
-    
-
     for value in set(closest_primitive): 
-        segmented_pointcloud = pointcloud[closest_primitive == value]
-        fig.add_trace(
-            go.Scatter3d(
-                name = 'pointcloud',
-                showlegend=True,
-                x=segmented_pointcloud[:,0], 
-                y=segmented_pointcloud[:,1], 
-                z=segmented_pointcloud[:,2],
-                mode = 'markers', 
-                marker=dict(size=1, 
-                            color='grey',
-                            opacity=0.7)))
+        if value != 0: 
+            segmented_pointcloud = pointcloud[closest_primitive == value]
+            fig.add_trace(
+                go.Scatter3d(
+                    name = 'pointcloud',
+                    showlegend=True,
+                    x=segmented_pointcloud[:,0], 
+                    y=segmented_pointcloud[:,1], 
+                    z=segmented_pointcloud[:,2],
+                    mode = 'markers', 
+                    marker=dict(size=1, 
+                                color='grey',
+                                opacity=0.7)))        
     fig.update_scenes(
         xaxis_visible=False, 
         yaxis_visible=False,
@@ -236,6 +234,9 @@ def visualize_superquadric_true_segmentation(pointcloud, superquadrics, closest_
     return
 
 
+palette_visualize_gt = cycle(['black', 'red', 'green'])
+palette_visualize_gt2 = cycle(['black', 'red', 'green'])
+
 def visualize_gt_pred(pointcloud_gt, ground_truth, partial_pointcloud, partial_pred):
     fig = make_subplots(
         rows=1, cols=2,
@@ -253,7 +254,7 @@ def visualize_gt_pred(pointcloud_gt, ground_truth, partial_pointcloud, partial_p
                 z=segmented_pointcloud[:,2],
                 mode = 'markers', 
                 marker=dict(size=1, 
-                            color=next(palette),
+                            color=next(palette_visualize_gt),
                             opacity=0.7)),
                 row=1, 
                 col=1)
@@ -269,7 +270,7 @@ def visualize_gt_pred(pointcloud_gt, ground_truth, partial_pointcloud, partial_p
                 z=segmented_pointcloud[:,2],
                 mode = 'markers', 
                 marker=dict(size=1, 
-                            color=next(palette2),
+                            color=next(palette_visualize_gt2),
                             opacity=0.7)),
                 row=1, 
                 col=2)

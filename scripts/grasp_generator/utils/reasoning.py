@@ -38,6 +38,9 @@ class PrologFunctionTask():
 
                 # query = pq.prolog_query("primitive_values(ID, Eps, _, _,_), shape_identification(Eps, Shape).")
                 # forms = pq.get_all_solutions(query)
+
+                list_id = []
+                list_region = []
                 try: 
                         if results[0] == 'false':
                                 raise ValueError("No feasible task found", results[0])
@@ -52,13 +55,13 @@ class PrologFunctionTask():
                                                 found_task = re.findall(r"'(.*?)'", word, re.DOTALL)[0]
                                         if found_task == task:
                                                 # print("TASK FOUND")
-                                                Id = int(results[2::3][idx])
-                                                region = results[::3][idx]
-                                                break
+                                                list_id.append(int(results[2::3][idx]))
+                                                list_region.append(results[::3][idx])
                 except:
-                        Id = 1
-                        region = 'All'
-                return Id, region
+                        Id = [1]
+                        region = ['All']
+                
+                return list_id, list_region
       
                 # query = pq.prolog_query("select_primitive('"+pap + product+"', '"+pap + task+"', ID, _).")
                 # print("select_primitive", pq.get_all_solutions(query))

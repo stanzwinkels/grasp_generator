@@ -231,7 +231,7 @@ def angle2points(theta, scale, epsilon):
 
 
 
-def point_cloud_segmentation(superquadrics, points):
+def point_cloud_segmentation(superquadrics, points, request_ID):
     """
     Function to segment the partial point cloud using the radial euclidean distance function. 
     """ 
@@ -256,11 +256,13 @@ def point_cloud_segmentation(superquadrics, points):
                 closest_primitive[idx_point] = (idx_quad+1)
                 distances[idx_point] = distance
 
+    for request in request_ID: 
+        closest_primitive[closest_primitive == request] = 0 
     return closest_primitive, distances
 
 
 
-def point_cloud_segmentation_cylinder(superquadrics, points, label, region, ID):
+def point_cloud_segmentation_cylinder(superquadrics, pointcloud, labels, regions, request_ID):
     """
     Function to segment the partial point cloud using the radial euclidean distance function. 
 
@@ -268,59 +270,49 @@ def point_cloud_segmentation_cylinder(superquadrics, points, label, region, ID):
         input: 
             True: disk_top
             False: disk_bottom, disk_surface, superquadrics \= ID
-
             Output: segmented partial pointcloud!
-        
         disk_top is requested region
     """ 
 
-    true_region = region[label]
-    false_region = region[~label]
+    points_true, points_false = np.array([]), np.array([])
+    i, j = 0, 0 
 
-    points_true = np.array([])
-    points_false = np.array([])
-    i, j = 0, 0
+    for region_index, region in enumerate(regions):
+        true_region = region[labels[region_index]]
+        false_region = region[~labels[region_index]]
 
-    for i in range(len(true_region)):
-        points_true = np.append(points_true, true_region[i])
+        for i in range(len(true_region)):
+            points_true = np.append(points_true, true_region[i])
+        for j in range(len(false_region)):
+            points_false = np.append(points_false, false_region[j])
 
-    for j in range(len(false_region)):
-        points_false = np.append(points_false, false_region[j])
+    points_region_tree_true = KDTree(points_true.reshape(-1,3))
+    dist_true, _ = points_region_tree_true.query(pointcloud, k=1)           # distance partial points to region
+    points_region_tree_neg = KDTree(points_false.reshape(-1,3))                  # distance partial points to region
+    dist_neg, _ = points_region_tree_neg.query(pointcloud, k=1)
 
-    points_true = points_true.reshape(-1,3)
-    points_false = points_false.reshape(-1,3)
-
-    distance_pointcloud = np.zeros(len(points))
-    pred_label_pointcloud = np.zeros(len(points))
-
-    points_region_tree_true = KDTree(points_true)
-    dist_true, _ = points_region_tree_true.query(points, k=1)           # distance partial points to region
-
-    points_region_tree_neg = KDTree(points_false)                  # distance partial points to region
-    dist_neg, _ = points_region_tree_neg.query(points, k=1)
-
+    # correct labels are given 0, and false 1. 
+    distance_pointcloud = np.zeros(len(pointcloud))
+    pred_label_pointcloud = np.zeros(len(pointcloud))
     distance_pointcloud = np.where(dist_true < dist_neg, dist_true, dist_neg)
     pred_label_pointcloud = np.where(dist_true < dist_neg, pred_label_pointcloud, 1)
 
-    for idx_point, point in enumerate(points): 
-        for j in [x for x in range(len(superquadrics)) if x != (ID-1)]:          
-            eps = superquadrics[j][0:2]
-            scale = superquadrics[j][2:5]
-            quaternion = Quaternion(superquadrics[j][5:9][3], superquadrics[j][5:9][0], superquadrics[j][5:9][1], superquadrics[j][5:9][2]).inverse
-            translation = superquadrics[j][9:12]
+    nr_superquadrics = np.array(range(len(superquadrics)))
+    left_overs = np.array(request_ID)-1
+    resulting_list = nr_superquadrics[np.isin(nr_superquadrics, left_overs, invert=True)]
+
+    for idx_point, point in enumerate(pointcloud): 
+        for shape_id in resulting_list: 
+            eps = superquadrics[shape_id][0:2]
+            scale = superquadrics[shape_id][2:5]
+            quaternion = Quaternion(superquadrics[shape_id][5:9][3], superquadrics[shape_id][5:9][0], superquadrics[shape_id][5:9][1], superquadrics[shape_id][5:9][2]).inverse
+            translation = superquadrics[shape_id][9:12]
 
             point_quat_frame = quaternion.rotate(point-translation)
             distance = radial_euclidean_distance(point_quat_frame, scale, eps)
 
             if distance < distance_pointcloud[idx_point]:
-                pred_label_pointcloud[idx_point] = (j+1)
+                pred_label_pointcloud[idx_point] = (shape_id+1)
                 distance_pointcloud[idx_point] = distance
-
-
-    # sample points that are "true", thus 0 
-    # use DBSCAN to sample clusters!
-    # keep biggest cluster only! assumption that biggest cluster is always the face that is suited for grasping. While this doesn't have to be the case. 
-    # solves also the problem of the pan!
-
-
     return pred_label_pointcloud, distance_pointcloud
+

@@ -30,37 +30,37 @@
 
 
 affordance(ID, Surface, pap:'Grasp') :-                 
-    primitive_values(ID, Eps, Dim, _,Semantic_shape),
+    primitive_values(ID, _, Dim, _,Semantic_shape),
     hard_condition_min(Dim, [0.01, 0.01, 0.01]),        % Otherwise too small for a grasp component. 
     soft_condition_min(Dim, 0.05),
     soft_condition_max(Dim, 0.05),                      % at least one shape is between certain parameters
     min_shape_difference(Dim, 2),                       % at least one axis is x times as long as the others
-    Semantic_shape = 'cylinder', 
-    Surface = "All".
+    Semantic_shape == 'cylinder', 
+    Surface = 'All'.
 
 affordance(ID, Surface, pap:'Wgrasp') :-                 
-    primitive_values(ID, Eps, Dim, _, Semantic_shape),
+    primitive_values(ID, _, Dim, _, Semantic_shape),
     hard_condition_min(Dim, [0.01, 0.01, 0.01]),        % Otherwise too small for a grasp component. 
-    soft_condition_min(Dim, 0.05),
+    soft_condition_min(Dim, 0.05),                      % Both diameters should be at least 0.05m
     min_shape_difference(Dim, 2),                       % at least one axis is x times as long as the others
-    Semantic_shape = 'cylinder', 
+    Semantic_shape == 'cylinder', 
     Surface = 'Round'. 
 
     
 affordance(ID, Surface, pap:'Contain') :-
-    primitive_values(ID, Eps, Dim, _, Semantic_shape),
-    Semantic_shape = 'cylinder',  
+    primitive_values(ID, _, Dim, _, Semantic_shape),
+    Semantic_shape == 'cylinder',  
     hard_condition_min(Dim, [0.03,0.03,0.03]),          % Otherwise too small to be considered as a container
     max_shape(ID),
     Surface = 'Round'.   
 
 
 affordance(ID, Surface, pap:'Pound') :-
-    primitive_values(ID, Eps, Dim, _, Semantic_shape), 
+    primitive_values(ID, _, Dim, _, Semantic_shape), 
     max_shape_difference(2.2, Dim),                     % Objects to pound with are typically cuboid 
     hard_condition_min(Dim, [0.03,0.03,0.03]),          % Otherwise too small to pound with
-    (Semantic_shape = 'cylinder', ;                     % Can be both rectangular and spherical shaped. 
-        Semantic_shape = 'cuboid'),
+    (Semantic_shape == 'cylinder' ;                     % Can be both rectangular and spherical shaped. 
+        Semantic_shape == 'cuboid'),
     Surface = 'All'.       
 
 
@@ -72,11 +72,11 @@ affordance(ID, Surface, pap:'Support') :-
 
 
 affordance(ID, Surface, pap:'Scoop') :-                 
-    primitive_values(ID, Eps, Dim, _, Semantic_shape),                
+    primitive_values(ID, _, Dim, _, Semantic_shape),                
     hard_condition_min(Dim, [0.01, 0.01, 0.01]),        % Must be larger than 1 cm, otherwise difficult to scoop. 
     hard_condition_max(Dim, [0.1, 0.1, 0.1]),           % Otherwise it is too big for a scoop and more of a container. 
     max_shape_difference(2, Dim),                       % A scoop is spherical, and therefore 2 sides have similar lengths. 
-    Semantic_shape = 'sphere',                          % A shape is spherically shaped. 
+    Semantic_shape == 'sphere',                          % A shape is spherically shaped. 
     Surface = 'All'.
 
 
