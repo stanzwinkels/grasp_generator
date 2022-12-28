@@ -5,25 +5,27 @@ import rospy
 
 # Clients
 from grasp_generator.server_clients.multiquadric_client import MultiquadricClient
+from grasp_generator.server_clients.semantic_client import SemanticClient
+
 
 # Utils
 from grasp_generator.utils.point_cloud_filtering import point_cloud_filter
 from grasp_generator.utils.standard_functions import (
     point_cloud_to_message,
-    save_pointcloud,
     load_pointcloud,
     filter_full_pointcloud, 
     accuracy_overlap_partial,
     transform_partial_pointcloud_origin,
-    cylinder_reasoning,
-    cube_segmentation,
-    surface_cylinder
-
+    region_cylinder
 )
+
+
 from grasp_generator.utils.superquadric_functions import (
     superquadric_overlapping,
     point_cloud_segmentation,
+    point_cloud_segmentation_cylinder
 )
+
 from grasp_generator.utils.reasoning import PrologShapeTask
 
 # Libaries
@@ -31,21 +33,22 @@ import numpy as np
 import rospkg
 import pdb
 from pandas  import *
-from pyquaternion import Quaternion
+import os
+import time
+
 # Messages
-from sensor_msgs.msg import PointCloud2
+import open3d as o3d
 
 # Visualization
 from grasp_generator.visualization.visualization_superquadric import (
     visualize_superquadric,
-    visualize_superquadric_segmentation, 
+    visualize_superquadric_cylinder,
+    visualize_superquadric_segmentation,
+    visualize_gt_pred,
     visualize_pointclouds,
-    visualize_gt_pred
-)
-
-# from grasp_generator.visualization.visualization_mesh_cube_cylinder import (
-#     visualize_cube
-# )
+    SingleSuperQuadric,
+    visualize_superquadric_true_segmentation
+    )
 
 # selection menu
 from grasp_generator.utils.menu import start
@@ -55,91 +58,109 @@ class Main:
     def __init__(
         self, debug=False, save=False, load=True, superquadric_visualize=True
     ):
+        self._nr_products = 1
+        self.save_to_excel = False
         self.debug = debug
         self.save = save
         self.load = load
         self.superquadric_visualize = superquadric_visualize
-
+        self.grasp_visualize = False
         self.topic_pointcloud_rgb = "/camera/depth/color/points"
         self.topic_pointcloud_tiago = "/xtion/depth_registered/points"
         # self.topic_aruco_detection = "/aruco_marker_publisher/markers"
-
         self.task = "Pour"
         self.product = "Limonade"
-
         self.rospack = rospkg.RosPack()
         self.package_path = self.rospack.get_path("grasp_generator")
-
+    
 
     def run(self):
         if self.load:
-            partial_pointcloud, name, _ = load_pointcloud(
-                self.package_path + "/data/test_data")
-
-        if self.load:
-            full_pointcloud, _, colors_gt = load_pointcloud(
+            full_pointcloud, full_name, colors_gt = load_pointcloud(
                 self.package_path + "/data/full_pointcloud")
 
-        if not self.load:
-            pointcloud = rospy.wait_for_message(
-                self.topic_pointcloud_tiago, PointCloud2
-                ) 
-            partial_pointcloud = point_cloud_filter(pointcloud, self.debug)
+        object_name, ext = os.path.splitext(full_name)
+        package_path = self.rospack.get_path("grasp_generator")
+        directory_product = package_path + "/data/test_data/"+object_name+"/"
 
-            if self.save:
-                save_pointcloud(
-                    partial_pointcloud,
-                    self.product,
-                    self.package_path + "/data/" + self.product + "/")
-        
+        count = 1
+        resulting_scores = []
+        time_scores = []
+        for filename in os.listdir(directory_product):
+            source = o3d.io.read_point_cloud(directory_product+filename)
+            partial_pointcloud = np.asarray(source.points)
+            colors_pointcloud = np.asarray(source.colors)
+            try: 
+                print("Opening file number " + str(count) + " with name: " + str(filename))
+                start_time = time.time()
+                time_recovery_primitive = time.time()
+                multiquadric = MultiquadricClient()
+                superquadrics = multiquadric.run(point_cloud_to_message(partial_pointcloud))
+                time_recovery_primitive = (time.time() - time_recovery_primitive)
+                
+                time_overlap_removal = time.time()
+                superquadrics = np.reshape(superquadrics.quadrics, (-1, 12))
+                superquadrics, score = superquadric_overlapping(superquadrics)
+                time_overlap_removal = (time.time() - time_overlap_removal)
 
-        # 1. superquadric modelling
-        pointcloud_msg = point_cloud_to_message(partial_pointcloud)
-        multiquadric = MultiquadricClient()
-        superquadrics = multiquadric.run(pointcloud_msg)
-        superquadrics = np.reshape(superquadrics.quadrics, (-1, 12))
+                # singlesuperquadric = SingleSuperQuadric(superquadrics)
+                # superquadric_pointcloud = singlesuperquadric.coordinates()
+                # visualize_superquadric(partial_pointcloud, superquadric_pointcloud)
+                
+                time_shape_classification = time.time()
+                semantic_classification = SemanticClient()
+                semantic_shape = semantic_classification.run(superquadrics[:,:5])
+                time_shape_classification = (time.time() - time_shape_classification)
 
-        # if self.superquadric_visualize:
-        #     visualize_superquadric(partial_pointcloud, superquadrics)
-        filt_superquadrics, score = superquadric_overlapping(superquadrics)
-        if self.superquadric_visualize:
-            visualize_superquadric(partial_pointcloud, filt_superquadrics)
+                # df = concat([DataFrame(semantic_shape), DataFrame(superquadrics)], axis=1)        
+                # df = df.drop(columns=[5,6,7,8])
+                # df.iloc[:,3:6] = df.iloc[:,3:6]*2
+                # df.insert(loc=0, column='Name', value=filename)
+                # df = df.set_axis(['Name','semantic_shape','Shape0', 'Shape1', 'Dim1', 'Dim2', 'Dim3', 'Pos1', 'Pos2', 'Pos3'], axis=1, inplace=False)
+                # print(df.to_string())
 
-        # 2. prolog reasoning
-        prolog_reasoning = PrologShapeTask()
-        request_ID, forms = prolog_reasoning.shape_selection(
-            filt_superquadrics, self.product, self.task)
+                time_reasoning = time.time()
+                prolog_reasoning = PrologShapeTask()
+                request_ID, grasp_region = prolog_reasoning.shape_selection(superquadrics, self.product, self.task, semantic_shape)
+                time_reasoning = (time.time() - time_reasoning)
 
-        pdb.set_trace()
-        surface_cylinder(filt_superquadrics[request_ID, 2:5], filt_superquadrics[request_ID, 5:8], filt_superquadrics[request_ID, 8:12])
-        pdb.set_trace()
+                time_segmentation = time.time()
+                if grasp_region[0] == "All": 
+                    pointsegmentation, distances = point_cloud_segmentation(superquadrics, partial_pointcloud, request_ID)
+                if not (grasp_region[0] == "All"): 
+                    cylinder_pointsegmentations, labels = region_cylinder(grasp_region, superquadrics, request_ID)            
+                    pointsegmentation, distances = point_cloud_segmentation_cylinder(superquadrics, partial_pointcloud, labels, cylinder_pointsegmentations, request_ID)
+                time_segmentation = (time.time() - time_segmentation)
+                total_time = (time.time() - start_time)
+                
+                # origin_partial_pointcloud = transform_partial_pointcloud_origin(self.package_path, partial_pointcloud, filename)
+                # pointcloud_gt, ground_truth = filter_full_pointcloud(full_pointcloud, colors_gt) 
 
-        df = concat([DataFrame(forms), DataFrame(filt_superquadrics)], axis=1)        
-        df = df.drop(columns=[5,6,7,8])
-        df.iloc[:,3:6] = df.iloc[:,3:6]*2
-        df = df.set_axis(['form','Shape0', 'Shape1', 'Dim1', 'Dim2', 'Dim3', 'Pos1', 'Pos2', 'Pos3'], axis=1, inplace=False)
-        print(df.to_string())
-        pdb.set_trace()
+                # visualize_superquadric_cylinder(partial_pointcloud, superquadric_pointcloud, cylinder_pointsegmentations)
+                # visualize_superquadric_true_segmentation(partial_pointcloud, superquadric_pointcloud, pointsegmentation)
+                # visualize_superquadric_segmentation(partial_pointcloud, superquadric_pointcloud, pointsegmentation)
+                # visualize_gt_pred(pointcloud_gt, ground_truth, origin_partial_pointcloud, pointsegmentation)
+                # visualize_pointclouds(origin_partial_pointcloud, pointcloud_gt)
+                
+                # accuracy, true_positive_rate = accuracy_overlap_partial(pointcloud_gt, ground_truth, origin_partial_pointcloud, pointsegmentation)
+                # resulting_scores.append([accuracy,true_positive_rate])
+                count += 1
+                comp_total_time = time_recovery_primitive + time_overlap_removal + time_shape_classification + time_reasoning + time_segmentation
+                time_scores.append([filename, time_recovery_primitive, time_overlap_removal, time_shape_classification, time_reasoning, time_segmentation, total_time, comp_total_time])
 
-        # 3. Segmentation of partial pointcloud 
-        closest_primitive, distances = point_cloud_segmentation(filt_superquadrics, partial_pointcloud)
-        if self.superquadric_visualize:
-            visualize_superquadric_segmentation(closest_primitive, partial_pointcloud, filt_superquadrics)
-        origin_partial_pointcloud = transform_partial_pointcloud_origin(self.package_path, partial_pointcloud, name)
+            except: 
+                print("\n")
+                print("COUNT: " + str(count) + " FAILED TO OPEN: " + str(filename))
+                print("\n")
+                count += 1
 
-        # 4. have ground truth of the full point cloud. 
-        pointcloud_gt, ground_truth = filter_full_pointcloud(full_pointcloud, colors_gt) 
-        closest_primitive[closest_primitive != request_ID] = 0 #undesired grasp area
-        closest_primitive[closest_primitive == request_ID] = 1  #desired grasp area
+            df_data = np.array(resulting_scores)
+            scores_df = DataFrame(df_data)
+            scores_df.to_csv('resulting_scores_version1.csv', index=False)
 
-        ground_truth = np.logical_not(ground_truth).astype(int)         # reverse
-        partial_pred = closest_primitive
-        accuracy, true_positive_rate = accuracy_overlap_partial(pointcloud_gt, ground_truth, origin_partial_pointcloud, partial_pred)
-        
-
-        # 5. visualize the ground truth and predicted pointcloud 
-        visualize_gt_pred(pointcloud_gt, ground_truth, origin_partial_pointcloud, partial_pred)
-        visualize_pointclouds(origin_partial_pointcloud, pointcloud_gt)
+            df_time = np.array(time_scores)
+            times_df = DataFrame(df_time)
+            times_df.to_csv('time_scores', index=False)
 
 
 
@@ -150,13 +171,3 @@ if __name__ == "__main__":
     main.run()
 
 
-
-# PUT THIS IN ANOTHER PYTHON FILE!!!
-        # 2.1 reasoning about the height etc. 
-        # height, diameters = cylinder_reasoning(filt_superquadrics[0,0:2], filt_superquadrics[0,2:5])
-        # pdb.set_trace()
-
-        # mesh_xy, mesh_xz, mesh_yz, mesh_xy_neg, mesh_xz_neg, mesh_yz_neg = cube_segmentation(filt_superquadrics[0,2:5], filt_superquadrics[0,5:8], Quaternion(filt_superquadrics[0,8:12]))
-        # visualize_cube(mesh_xy, mesh_xz, mesh_yz, mesh_xy_neg, mesh_xz_neg, mesh_yz_neg, superquadric)
-        
-        # visualize both. 
