@@ -12,8 +12,12 @@
         soft_condition_max/2,
         hard_condition_min/2,
         hard_condition_max/2,
-        max_shape_difference/2,
-        min_shape_difference/2, 
+        min_dimension/2,
+        max_dimension/2,
+        % max_shape_difference/2,
+        % min_shape_difference/2,
+        min_ratio/2,
+        max_ratio/2, 
         flatten2D/2,
         roundD/2,   
         roundlist/2,
@@ -34,7 +38,7 @@
 % :- rdf_meta
 %     primitive_values(+,+,+,+,+). 
 
-
+% Finds the ID for the shape with the biggest Volume.
 max_shape(ID) :- 
     findall(V, 
         (primitive_values(_,_,Shape0,_,_), 
@@ -47,6 +51,7 @@ max_shape(ID) :-
     roundD(Vol, Vol_round),
     Max_Round == Vol_round.
 
+% Finds the ID for the shape with the smallest Volume.
 min_shape(ID) :- 
     findall(V, 
         (primitive_values(_,_,Shape0,_,_), 
@@ -85,24 +90,35 @@ hard_condition_max([X,Y,Z], [Tx, Ty, Tz]) :-
     Elements \== [],
     Elements == [X,Y,Z].
 
-max_shape_difference(Threshold, List) :- 
-    forall(member(A, List), 
-        (forall(member(B, List), 
-            (
-                Low is B/Threshold,
-                Up is B*Threshold, 
-                Low < A, 
-                A < Up
-                )))).
+% specific restrictions for the min dimensions in ascending order
+min_dimension(Dim, [C1, C2, C3]) :-
+    sort(0, @=<, Dim, [D1, D2, D3]),
+    D1 > C1, 
+    D2 > C2, 
+    D3 > C3.
 
-min_shape_difference([A,B,C], Threshold) :- 
-    (Threshold*B < A, 
-    Threshold*C < A) ;
-    (Threshold*C < B, 
-    Threshold*A < B) ;
-    (Threshold*A < C, 
-    Threshold*B < C). 
+%  specific restriction for the max dimensions in ascending order
+max_dimension(Dim, [C1, C2, C3]) :-
+    sort(0, @=<, Dim, [D1, D2, D3]), 
+    D1 < C1, 
+    D2 < C2, 
+    D3 < C3. 
 
+
+
+
+
+% Ratio should be BIGGER than the threshold
+min_ratio([A,B,C], Threshold) :- 
+    max_list([A,B,C], Max_value),
+    min_list([A,B,C], Min_value), 
+    (Max_value/Min_value) > Threshold. 
+
+% Ratio should be SMALLER than the threshold
+max_ratio([A,B,C], Threshold) :- 
+    max_list([A,B,C], Max_value),
+    min_list([A,B,C], Min_value), 
+    (Max_value/Min_value) < Threshold.     
 
 % Flatten a combined list [[x,x][x,x]] --> [x,x,x,x]
 flatten( [], Z, Z):- !.                                       
@@ -170,3 +186,21 @@ shape_identification([Eps1, Eps2], unknown) :-
     \+ shape_identification([Eps1, Eps2], cylindrical). 
 
 
+% min_shape_difference([A,B,C], Threshold) :- 
+%     (Threshold*B < A, 
+%     Threshold*C < A) ;
+%     (Threshold*C < B, 
+%     Threshold*A < B) ;
+%     (Threshold*A < C, 
+%     Threshold*B < C). 
+
+
+% max_shape_difference(Threshold, List) :- 
+%     forall(member(A, List), 
+%         (forall(member(B, List), 
+%             (
+%                 Low is B/Threshold,
+%                 Up is B*Threshold, 
+%                 Low < A, 
+%                 A < Up
+%                 )))).
