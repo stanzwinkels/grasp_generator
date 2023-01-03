@@ -18,6 +18,7 @@ import json
 import tf2_ros
 import numpy as np
 from pyquaternion import Quaternion
+import time
 
 # Messages
 from sensor_msgs.msg import PointCloud2
@@ -85,7 +86,7 @@ class Main:
                 self.topic_pointcloud_tiago, PointCloud2
                 )
 
-            partial_pointcloud = point_cloud_filter(pointcloud, self.debug)
+            scene_pointcloud, partial_pointcloud = point_cloud_filter(pointcloud, self.debug)
 
             # 1. Map frame --> Product frame
             map_pose_to_product = self.product_pose()
@@ -105,7 +106,8 @@ class Main:
             map_pose_to_camera = tf_buffer.lookup_transform("map", "xtion_rgb_optical_frame", rospy.Time(0), rospy.Duration(10))            
             map_position_to_camera = [map_pose_to_camera.transform.translation.x, map_pose_to_camera.transform.translation.y, map_pose_to_camera.transform.translation.z]
             map_orientation_to_camera = Quaternion(map_pose_to_camera.transform.rotation.w, map_pose_to_camera.transform.rotation.x, map_pose_to_camera.transform.rotation.y, map_pose_to_camera.transform.rotation.z)
-            # 4. Transform perceived partial-pointcloud to origin (0.0.0)
+            
+            # 4. Transform perceived partial-pointcloud to origin (0 ,0 ,0)
             new_pointcloud = []
             org_cam_partial_pointcloud = partial_pointcloud - camera_position_to_product
             for point in org_cam_partial_pointcloud:
@@ -113,17 +115,37 @@ class Main:
                 map_frame = obj_frame_pointcloud.tolist()
                 new_pointcloud.append(map_frame)
             new_pointcloud = np.array(new_pointcloud)
-
-
             visualize_pointclouds(new_pointcloud, full_pointcloud[0])
 
+
+            # # 4.1 Transform perceived full pointcloud to origin (0, 0, 0)
+            # new_complete_pointcloud = []
+            # org_cam_pointcloud = scene_pointcloud - camera_position_to_product
+            # for point in org_cam_pointcloud:
+            #     obj_frame_scene_pointcloud = product_orientation_to_camera.rotate(point)
+            #     map__scene_frame = obj_frame_scene_pointcloud.tolist()
+            #     new_complete_pointcloud.append(map__scene_frame)
+            # new_complete_pointcloud = np.array(new_complete_pointcloud)
+            # visualize_pointclouds(new_complete_pointcloud, full_pointcloud[0])
+
             # 5. Save partial-pointcloud + frame transformations
+            
+            t = time.localtime()
+            timestamp = time.strftime('%b-%d-%Y_%H%M%S', t)
             if self.save:        
                 saved_name = save_pointcloud(
                     partial_pointcloud,
                     self.product,
-                    self.package_path + "/data/test_data/"+ self.product+"/")
+                    self.package_path + "/data/GPD_data/"+ self.product+"/",
+                    timestamp)
+
+                _ = save_pointcloud(
+                    scene_pointcloud,
+                    "full_"+self.product,
+                    self.package_path + "/data/GPD_data/scene/"+ self.product+"/",
+                    timestamp)
                 
+
                 map_orientation_to_product1 = list([map_orientation_to_product.w, map_orientation_to_product.x, map_orientation_to_product.y, map_orientation_to_product.z])
                 map_orientation_to_camera1 = [map_orientation_to_camera.w, map_orientation_to_camera.x, map_orientation_to_camera.y, map_orientation_to_camera.z]
                 product_orientation_to_camera1 = [product_orientation_to_camera.w, product_orientation_to_camera.x, product_orientation_to_camera.y, product_orientation_to_camera.z]
@@ -135,12 +157,12 @@ class Main:
                 csv_product_orientation_camera = {saved_name: product_orientation_to_camera1}
                 csv_camera_position_product  = {saved_name: camera_position_to_product}
 
-                save_data(self.package_path + "/data/test_data/map_orientation_product.json", csv_map_orientation_product)
-                save_data(self.package_path + "/data/test_data/map_position_product.json", csv_map_position_product)
-                save_data(self.package_path + "/data/test_data/map_orientation_camera.json", csv_map_orientation_camera)
-                save_data(self.package_path + "/data/test_data/map_position_camera.json", csv_map_position_camera)
-                save_data(self.package_path + "/data/test_data/product_orientation_camera.json", csv_product_orientation_camera)
-                save_data(self.package_path + "/data/test_data/camera_position_product.json", csv_camera_position_product)
+                save_data(self.package_path + "/data/GPD_data/map_orientation_product.json", csv_map_orientation_product)
+                save_data(self.package_path + "/data/GPD_data/map_position_product.json", csv_map_position_product)
+                save_data(self.package_path + "/data/GPD_data/map_orientation_camera.json", csv_map_orientation_camera)
+                save_data(self.package_path + "/data/GPD_data/map_position_camera.json", csv_map_position_camera)
+                save_data(self.package_path + "/data/GPD_data/product_orientation_camera.json", csv_product_orientation_camera)
+                save_data(self.package_path + "/data/GPD_data/camera_position_product.json", csv_camera_position_product)
 
             logask = raw_input(" ----- ROTATE OBJECT!? (y/n): ------")
             if logask == 'y': 

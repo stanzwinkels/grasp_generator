@@ -21,9 +21,9 @@ class PrologFunctionTask():
                 print("do")
         
         def shape_selection(self, superquadrics, product, task, semantic_shapes):
-                task = 'Hammer'
+                task = 'Pour'
+                # pap = "http://www.semanticweb.org/stanz/ontologies/2022/11/afford-computation#"
                 pap = "http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#"
-
                 pq = PrologQuery()
 
                 if self.load:
@@ -34,7 +34,7 @@ class PrologFunctionTask():
                                 pos = superquadric[9:12]
                                 pq.prolog_query("assert(shape_to_function_to_task:primitive_values("+ str(id+1) +", "+str(list(shape))+", "+ str(list(scale)) +", "+ str(list(pos))+", "+ str(semantic_shapes[id]) +")).")
                 
-                query = pq.prolog_query("affordAffordance(ID, Region, Affordance).")
+                query = pq.prolog_query("affordAffordance(ID, Surface, Affordance).")
                 results = pq.get_all_solutions(query)
                 list_id = []    
                 list_region = []
@@ -45,16 +45,22 @@ class PrologFunctionTask():
                         not_affordance = pq.get_all_solutions(query)
                         results = np.reshape(results, (-1,3))
                         for not_afford in not_affordance:                             
-                                remove_result = np.append(remove_result, results[results[:,1] == not_afford])
+                                remove_result = np.append(remove_result, results[results[:,0] == not_afford])
                         remove_result = np.reshape(remove_result, (-1,3))
                         list_id = range(len(superquadrics)) 
                         remove_ids = map(int, remove_result[:,2])
-                        remove_ids = (np.array(remove_ids)-1).tolist()
+                        remove_ids = (np.array(remove_ids)).tolist()
+
+                        # Here add number of + 1
                         number_superquadrics = range(len(superquadrics))
+                        # Here add number otherwise incorrect...
+                        number_superquadrics = np.array(number_superquadrics)+1
                         list_id = [i for i in number_superquadrics if i not in remove_ids]
                         for id in list_id: 
                                 list_region.append('All')
-
+                        # query = pq.prolog_query("task_object(Affordance, pap:'Hammer').")
+                        # dummy_affordance = pq.get_all_solutions(query)
+                                
                 if not task == 'HandOver':
                         query = pq.prolog_query("task_object(Affordance, pap:'"+str(task) +"').")
                         required_affordance = pq.get_all_solutions(query)
@@ -64,8 +70,6 @@ class PrologFunctionTask():
                                 for idx, result in enumerate(results[0::3]):
                                         list_region.append(results[1::2][idx])
                                         list_id.append(int(results[0::2][idx]))
- 
- 
                 return list_id, list_region
                                  
 
@@ -80,7 +84,6 @@ class PrologShapeTask():
         def shape_selection(self, superquadrics, product, task, semantic_shapes):
                 task = 'HandOver'
                 pap = "http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#"
-
                 pq = PrologQuery()
         
                 if self.load:

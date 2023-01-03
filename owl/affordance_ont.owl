@@ -161,12 +161,6 @@
         <owl:disjointWith>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#RequiresAffordance"/>
-                <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#AffordGrasp"/>
-            </owl:Restriction>
-        </owl:disjointWith>
-        <owl:disjointWith>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#RequiresAffordance"/>
                 <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#AffordWgrasp"/>
             </owl:Restriction>
         </owl:disjointWith>

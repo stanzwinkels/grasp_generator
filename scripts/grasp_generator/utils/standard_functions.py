@@ -20,6 +20,9 @@ from pyquaternion import Quaternion
 from geometry_msgs.msg import Pose, PoseStamped, Point32
 from tf.transformations import quaternion_multiply, quaternion_conjugate, quaternion_from_matrix
 
+from grasp_generator.visualization.visualization_superquadric import (
+    visualize_grasp_point
+)
 
 def save_to_excel(file,object_name, df):
     book = load_workbook(file)
@@ -219,11 +222,9 @@ def load_single_pointcloud(location):
 
 
 
-def save_pointcloud(pointcloud, product, location): 
+def save_pointcloud(pointcloud, product, location, timestamp): 
     logask = raw_input("Save current pointcoud? (y/n): ")
     if logask == 'y': 
-        t = time.localtime()
-        timestamp = time.strftime('%b-%d-%Y_%H%M%S', t)
         product_name = product + "-" + timestamp 
         pcd = o3d.geometry.PointCloud()
         pcd.points = o3d.utility.Vector3dVector(pointcloud)
@@ -238,8 +239,8 @@ def filter_full_pointcloud(pointcloud_gt, colors_gt):
     black = np.array([0, 0 ,0])
     red = np.array([1,0,0])
     green = np.array([0,1,0])
-
     ground_truth = np.empty(len(pointcloud_gt))
+    
     for idx, color in enumerate(colors_gt):
         if (color == black).all():
             ground_truth[idx] = 1
@@ -249,6 +250,7 @@ def filter_full_pointcloud(pointcloud_gt, colors_gt):
             ground_truth[idx] = 3
         else: 
             ground_truth[idx] = -1
+
     pointcloud_gt = pointcloud_gt[ground_truth >= 0]
     ground_truth = ground_truth[ground_truth >= 0]
     return pointcloud_gt, ground_truth
@@ -258,11 +260,15 @@ def transform_partial_pointcloud_origin(package_path, partial_pointcloud, name):
     """
     Transform a partial pointcloud back around the location (0, 0, 0). The translation and rotation are canceled using the stored transformations in Json. 
     """
+    # pdb.set_trace()
     object_name, ext = os.path.splitext(name)
 
-    directory_camera_position_product = package_path + "/data/test_data/camera_position_product.json"
-    directory_product_orientation_camera = package_path + "/data/test_data/product_orientation_camera.json"
-    
+    # directory_camera_position_product = package_path + "/data/test_data/camera_position_product.json"
+    # directory_product_orientation_camera = package_path + "/data/test_data/product_orientation_camera.json"
+
+    directory_camera_position_product = package_path + "/data/GPD_data/camera_position_product.json"
+    directory_product_orientation_camera = package_path + "/data/GPD_data/product_orientation_camera.json"
+
     camera_position_product = json.load(open(directory_camera_position_product))
     product_orientation_camera = json.load(open(directory_product_orientation_camera))
     camera_position_product = create_dict(camera_position_product)[object_name]
@@ -283,8 +289,8 @@ def accuracy_overlap_partial(pointcloud_gt, ground_truth, partial_pointcloud, pa
     partial_pointcloud_label[partial_pointcloud_label != 0] = 1
     
     # desired_color = 'black = 1, red = 2, green = 3 '
-    ground_truth[ground_truth == 2] = 0
-    ground_truth[ground_truth >2] = 1
+    ground_truth[ground_truth == 2] = 0         # variable!
+    ground_truth[ground_truth >0] = 1           # default: 0 
     
     tree = KDTree(pointcloud_gt)
     dist, ids = tree.query(partial_pointcloud, k=1)
@@ -356,6 +362,85 @@ def quaternion_rotation_matrix(pose):
     quat = quaternion_from_matrix(rotation_matrix)
     return quat
 
+
+def gpd_grasp_succes(grasp_poses, partial_pointcloud, full_pointcloud, package_path, filename_ext, colors_gt):
+    grasp_positions = []
+    for grasp in grasp_poses.grasps: 
+            grasp_positions.append([grasp.position.x, grasp.position.y, grasp.position.z])
+    grasp_positions = np.array(grasp_positions)
+
+    tree = KDTree(partial_pointcloud)
+    dist_grasp, ids_grasp = tree.query(grasp_positions, k=1)
+    desired_point = partial_pointcloud[ids_grasp[0]]
+
+    directory_camera_position_product = package_path + "/data/GPD_data/camera_position_product.json"
+    directory_product_orientation_camera = package_path + "/data/GPD_data/product_orientation_camera.json"
+    camera_position_product = json.load(open(directory_camera_position_product))
+    product_orientation_camera = json.load(open(directory_product_orientation_camera))  
+    camera_position_product = create_dict(camera_position_product)[filename_ext]
+    product_orientation_camera = create_dict(product_orientation_camera)[filename_ext]
+    product_orientation_camera = Quaternion(product_orientation_camera[0], product_orientation_camera[1], product_orientation_camera[2], product_orientation_camera[3])
+
+    point = desired_point - camera_position_product
+    obj_frame_pointcloud = product_orientation_camera.rotate(point)
+    new_point = obj_frame_pointcloud.tolist()   
+
+    grasp_point = grasp_positions[0] - camera_position_product
+    grasp_obj_frame_pointcloud = product_orientation_camera.rotate(grasp_point)
+    new_grasp_point = grasp_obj_frame_pointcloud.tolist()   
+
+    pointcloud_gt, ground_truth = filter_full_pointcloud(full_pointcloud, colors_gt) 
+    # visualize_grasp_point(new_grasp_point, new_point, pointcloud_gt, ground_truth)
+      
+    full_pointcloud_tree = KDTree(full_pointcloud)
+    dist, ids = full_pointcloud_tree.query(new_point, k=1)
+    # print("FINAL COLORS = ", colors_gt[ids])              
+    
+    origin_grasp_positions = []
+    for grasp in grasp_positions: 
+        point = grasp - camera_position_product
+        obj_frame_pointcloud = product_orientation_camera.rotate(point)
+        new_point = obj_frame_pointcloud.tolist()   
+        origin_grasp_positions.append(new_point)
+    origin_grasp_positions = np.array(origin_grasp_positions)
+
+    dist_all_grasps, ids_all_grasps = full_pointcloud_tree.query(origin_grasp_positions, k=1)
+    predicted_grasps = ground_truth[ids_all_grasps]  
+    return grasp_positions, ids_grasp,  ground_truth[ids], predicted_grasps
+
+
+def reasoning_grasp_succes(correct_grasps, correct_grasps_id, found_positions, full_pointcloud, package_path, filename_ext, colors_gt):
+    directory_camera_position_product = package_path + "/data/GPD_data/camera_position_product.json"
+    directory_product_orientation_camera = package_path + "/data/GPD_data/product_orientation_camera.json"
+    camera_position_product = json.load(open(directory_camera_position_product))
+    product_orientation_camera = json.load(open(directory_product_orientation_camera))  
+    camera_position_product = create_dict(camera_position_product)[filename_ext]
+    product_orientation_camera = create_dict(product_orientation_camera)[filename_ext]
+    product_orientation_camera = Quaternion(product_orientation_camera[0], product_orientation_camera[1], product_orientation_camera[2], product_orientation_camera[3])
+
+    translated_position = []
+    for position in found_positions: 
+        point = position - camera_position_product
+        obj_frame_pointcloud = product_orientation_camera.rotate(point)
+        new_point = obj_frame_pointcloud.tolist()   
+        translated_position.append(new_point)
+    translated_position = np.array(translated_position)
+
+    pointcloud_gt, ground_truth = filter_full_pointcloud(full_pointcloud, colors_gt) 
+
+    # USE ONLY 1 TRANSLATED POSITION! MAYBE THE FIRST ONE
+    full_pointcloud_tree = KDTree(full_pointcloud)
+    dist_reasoning, ids_reasoning = full_pointcloud_tree.query(translated_position, k=1)
+    # print("FINAL COLORS = ", ground_truth[ids])
+    # print("FINAL COLORS = ", colors_gt[ids])
+
+    # select grasp that is closest to the object.
+    index_min_distance = np.argmin(dist_reasoning)
+    requested_id = ids_reasoning[index_min_distance]
+    return colors_gt[requested_id], ground_truth[requested_id], correct_grasps_id[index_min_distance], correct_grasps[index_min_distance]
+
+
+
 def transform_pose(pose, from_frame, to_frame):
     """
     Function to transform coordinates one frame to another frame 
@@ -385,3 +470,89 @@ def transform_pose(pose, from_frame, to_frame):
 
     output_pose_stamped = tf_buffer.transform(start_pose, to_frame, rospy.Duration(2))    
     return output_pose_stamped.pose
+
+
+
+def multiple_grasp_poses(grasp_poses):
+    left_lines = []
+    right_lines = []
+    middle_lines = []
+    hand_lines = []
+    for grasp in grasp_poses.grasps: 
+        grasp_position = np.array([grasp.position.x, grasp.position.y, grasp.position.z])
+        grasp_approach = np.array([grasp.approach.x, grasp.approach.y, grasp.approach.z])
+        grasp_binormal = np.array([grasp.binormal.x, grasp.binormal.y, grasp.binormal.z])
+        grasp_axis = np.array([grasp.axis.x, grasp.axis.y, grasp.axis.z])
+        
+        rotation_matrix = np.eye(4)
+        rotation_matrix[0:3,0] = grasp_approach
+        rotation_matrix[0:3,1] = grasp_binormal
+        rotation_matrix[0:3,2] = grasp_axis
+
+
+        # Change this yaml parameters automatically!
+        hand_depth = 0.06
+        hand_height = 0.02
+        outer_diameter = 0.12
+        finger_width = 0.01
+        
+        hw = 0.5 * outer_diameter - 0.5 * finger_width
+        left_bottom = grasp_position - hw * grasp_binormal
+        right_bottom = grasp_position + hw * grasp_binormal
+        left_top = left_bottom + hand_depth * grasp_approach
+        right_top = right_bottom + hand_depth * grasp_approach
+        left_center = left_bottom + 0.5*(left_top - left_bottom)
+        right_center = right_bottom + 0.5*(right_top - right_bottom)
+        base_center = left_bottom + 0.5*(right_bottom - left_bottom) - 0.01*grasp_approach
+        approach_center = base_center - 0.04*grasp_approach
+
+        left_line = np.stack((left_bottom, left_top))
+        right_line = np.stack((right_bottom, right_top))
+        middle_line = np.stack((left_bottom, right_bottom))
+        hand_line = np.stack((base_center, approach_center))
+
+        left_lines.append(left_line)
+        right_lines.append(right_line)
+        middle_lines.append(middle_line)
+        hand_lines.append(hand_line)
+
+    left_lines = np.array(left_lines)
+    right_lines = np.array(right_lines)
+    middle_lines = np.array(middle_lines)
+    hand_lines = np.array(hand_lines)
+    return left_lines, right_lines, middle_lines, hand_lines
+
+
+def single_grasp_poses(grasp_pose):
+    grasp_position = np.array([grasp_pose.position.x, grasp_pose.position.y, grasp_pose.position.z])
+    grasp_approach = np.array([grasp_pose.approach.x, grasp_pose.approach.y, grasp_pose.approach.z])
+    grasp_binormal = np.array([grasp_pose.binormal.x, grasp_pose.binormal.y, grasp_pose.binormal.z])
+    grasp_axis = np.array([grasp_pose.axis.x, grasp_pose.axis.y, grasp_pose.axis.z])
+        
+    rotation_matrix = np.eye(4)
+    rotation_matrix[0:3,0] = grasp_approach
+    rotation_matrix[0:3,1] = grasp_binormal
+    rotation_matrix[0:3,2] = grasp_axis
+
+    # Change this yaml parameters automatically!
+    hand_depth = 0.06
+    hand_height = 0.02
+    outer_diameter = 0.12
+    finger_width = 0.01
+    
+    hw = 0.5 * outer_diameter - 0.5 * finger_width
+    left_bottom = grasp_position - hw * grasp_binormal
+    right_bottom = grasp_position + hw * grasp_binormal
+    left_top = left_bottom + hand_depth * grasp_approach
+    right_top = right_bottom + hand_depth * grasp_approach
+    left_center = left_bottom + 0.5*(left_top - left_bottom)
+    right_center = right_bottom + 0.5*(right_top - right_bottom)
+    base_center = left_bottom + 0.5*(right_bottom - left_bottom) - 0.01*grasp_approach
+    approach_center = base_center - 0.04*grasp_approach
+
+    left_line = np.stack((left_bottom, left_top))
+    right_line = np.stack((right_bottom, right_top))
+    middle_line = np.stack((left_bottom, right_bottom))
+    hand_line = np.stack((base_center, approach_center))
+
+    return left_line, right_line, middle_line, hand_line
