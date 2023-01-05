@@ -5,7 +5,7 @@ perception_area:
   min_width_threshold: -1.4   # default -0.4  # left_side: set higher for smaller field
   
 plane_segmentation:
-  distance_threshold: 0.01
+  distance_threshold: 0.01    # TUne this parameter for the accuracy of plane segmentation
   ransac_n: 3
   num_iterations: 1000
  

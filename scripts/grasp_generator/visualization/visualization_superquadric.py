@@ -590,3 +590,300 @@ def visualize_scene_pointcloud(scene_pointcloud, left_lines, right_lines, middle
                         )
     fig.show()
     return
+
+
+
+
+def visualize_grasps_pointcloud(scene_pointcloud, left_lines, right_lines, middle_lines, hand_lines, left_line_gpd, right_line_gpd, middle_line_gpd, hand_line_gpd, left_line_reasoning, right_line_reasoning, middle_line_reasoning, hand_line_reasoning, grasp_pose_gpd ,grasp_pose_reasoning):
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'partial pointcloud',
+            showlegend=True,
+            x=scene_pointcloud[:,0], 
+            y=scene_pointcloud[:,1], 
+            z=scene_pointcloud[:,2],
+            mode = 'markers', 
+            marker=dict(size=1, 
+                        color="blue",
+                        opacity=0.7)))
+
+    # for left_line in left_lines:
+    #     fig.add_trace(
+    #         go.Scatter3d(
+    #             name = 'Hand',
+    #             showlegend=True,
+    #             x=left_line[:,0], 
+    #             y=left_line[:,1], 
+    #             z=left_line[:,2],
+    #             mode = 'lines', 
+    #             marker=dict(size=1, 
+    #                         color="orange",
+    #                         opacity=0.7)))
+
+    # for right_line in right_lines:
+    #     fig.add_trace(
+    #         go.Scatter3d(
+    #             name = 'Hand',
+    #             showlegend=True,
+    #             x=right_line[:,0], 
+    #             y=right_line[:,1], 
+    #             z=right_line[:,2],
+    #             mode = 'lines', 
+    #             marker=dict(size=1, 
+    #                         color="orange",
+    #                         opacity=0.7)))
+
+    # for middle_line in middle_lines:
+    #     fig.add_trace(
+    #     go.Scatter3d(
+    #         name = 'Hand',
+    #         showlegend=True,
+    #         x=middle_line[:,0], 
+    #         y=middle_line[:,1], 
+    #         z=middle_line[:,2],
+    #         mode = 'lines', 
+    #         marker=dict(size=1, 
+    #                     color="orange",
+    #                     opacity=0.7)))
+
+    # for hand_line in hand_lines:
+    #     fig.add_trace(
+    #         go.Scatter3d(
+    #             name = 'Hand',
+    #             showlegend=True,
+    #             x=hand_line[:,0], 
+    #             y=hand_line[:,1], 
+    #             z=hand_line[:,2],
+    #             mode = 'lines', 
+    #             marker=dict(size=1, 
+    #                         color="orange",
+    #                         opacity=0.7)))
+
+
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'GPD',
+            showlegend=True,
+            x=left_line_gpd[:,0], 
+            y=left_line_gpd[:,1], 
+            z=left_line_gpd[:,2],
+            mode = 'lines', 
+            marker=dict(size=2, 
+                        color="red",
+                        opacity=0.7)))
+
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'GPD',
+            showlegend=True,
+            x=right_line_gpd[:,0], 
+            y=right_line_gpd[:,1], 
+            z=right_line_gpd[:,2],
+            mode = 'lines', 
+            marker=dict(size=2, 
+                        color="red",
+                        opacity=0.7)))
+
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'GPD',
+            showlegend=True,
+            x=middle_line_gpd[:,0], 
+            y=middle_line_gpd[:,1], 
+            z=middle_line_gpd[:,2],
+            mode = 'lines', 
+            marker=dict(size=2, 
+                        color="red",
+                        opacity=0.7)))
+
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'GPD',
+            showlegend=True,
+            x=hand_line_gpd[:,0], 
+            y=hand_line_gpd[:,1], 
+            z=hand_line_gpd[:,2],
+            mode = 'lines', 
+            marker=dict(size=2, 
+                        color="red",
+                        opacity=0.7)))
+
+
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'Reasoning',
+            showlegend=True,
+            x=left_line_reasoning[:,0], 
+            y=left_line_reasoning[:,1], 
+            z=left_line_reasoning[:,2],
+            mode = 'lines', 
+            marker=dict(size=2, 
+                        color="green",
+                        opacity=0.7)))
+
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'Reasoning',
+            showlegend=True,
+            x=right_line_reasoning[:,0], 
+            y=right_line_reasoning[:,1], 
+            z=right_line_reasoning[:,2],
+            mode = 'lines', 
+            marker=dict(size=2, 
+                        color="green",
+                        opacity=0.7)))
+
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'Reasoning',
+            showlegend=True,
+            x=middle_line_reasoning[:,0], 
+            y=middle_line_reasoning[:,1], 
+            z=middle_line_reasoning[:,2],
+            mode = 'lines', 
+            marker=dict(size=2, 
+                        color="green",
+                        opacity=0.7)))
+
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'Reasoning',
+            showlegend=True,
+            x=hand_line_reasoning[:,0], 
+            y=hand_line_reasoning[:,1], 
+            z=hand_line_reasoning[:,2],
+            mode = 'lines', 
+            marker=dict(size=2, 
+                        color="green",
+                        opacity=0.7)))
+
+
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'Reasoning',
+            showlegend=True,
+            x=[grasp_pose_gpd.position.x], 
+            y=[grasp_pose_gpd.position.y], 
+            z=[grasp_pose_gpd.position.z],
+            mode = 'markers', 
+            marker=dict(size=3, 
+                        color="black",
+                        opacity=0.7)))
+
+
+
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'Reasoning',
+            showlegend=True,
+            x=[grasp_pose_reasoning.position.x], 
+            y=[grasp_pose_reasoning.position.y], 
+            z=[grasp_pose_reasoning.position.z],
+            mode = 'markers', 
+            marker=dict(size=3, 
+                        color="black",
+                        opacity=0.7)))
+
+    fig.update_scenes(
+        xaxis_visible=False, 
+        yaxis_visible=False,
+        zaxis_visible=False,
+    )
+
+    fig.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        showlegend=True)
+    fig.show()
+    return
+
+
+       
+
+def  visualize_grasp_gpd_pointcloud(scene_pointcloud, left_line_gpd, right_line_gpd, middle_line_gpd, hand_line_gpd, grasp_pose_gpd):
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'partial pointcloud',
+            showlegend=True,
+            x=scene_pointcloud[:,0], 
+            y=scene_pointcloud[:,1], 
+            z=scene_pointcloud[:,2],
+            mode = 'markers', 
+            marker=dict(size=1, 
+                        color="blue",
+                        opacity=0.7)))
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'GPD',
+            showlegend=True,
+            x=left_line_gpd[:,0], 
+            y=left_line_gpd[:,1], 
+            z=left_line_gpd[:,2],
+            mode = 'lines', 
+            marker=dict(size=2, 
+                        color="red",
+                        opacity=0.7)))
+
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'GPD',
+            showlegend=True,
+            x=right_line_gpd[:,0], 
+            y=right_line_gpd[:,1], 
+            z=right_line_gpd[:,2],
+            mode = 'lines', 
+            marker=dict(size=2, 
+                        color="red",
+                        opacity=0.7)))
+
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'GPD',
+            showlegend=True,
+            x=middle_line_gpd[:,0], 
+            y=middle_line_gpd[:,1], 
+            z=middle_line_gpd[:,2],
+            mode = 'lines', 
+            marker=dict(size=2, 
+                        color="red",
+                        opacity=0.7)))
+
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'GPD',
+            showlegend=True,
+            x=hand_line_gpd[:,0], 
+            y=hand_line_gpd[:,1], 
+            z=hand_line_gpd[:,2],
+            mode = 'lines', 
+            marker=dict(size=2, 
+                        color="red",
+                        opacity=0.7)))
+
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'Reasoning',
+            showlegend=True,
+            x=[grasp_pose_gpd.position.x], 
+            y=[grasp_pose_gpd.position.y], 
+            z=[grasp_pose_gpd.position.z],
+            mode = 'markers', 
+            marker=dict(size=3, 
+                        color="black",
+                        opacity=0.7)))
+
+
+    fig.update_scenes(
+        xaxis_visible=False, 
+        yaxis_visible=False,
+        zaxis_visible=False,
+    )
+
+    fig.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        showlegend=True)
+    fig.show()
+    return

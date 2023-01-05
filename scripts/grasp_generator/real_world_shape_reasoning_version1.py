@@ -6,12 +6,18 @@ import rospy
 # Clients
 from grasp_generator.server_clients.multiquadric_client import MultiquadricClient
 from grasp_generator.server_clients.semantic_client import SemanticClient
+from grasp_generator.server_clients.grasp_client import GraspClient
+
 
 # Utils
 from grasp_generator.utils.standard_functions import (
     point_cloud_to_message,
     load_pointcloud,
-    region_cylinder
+    region_cylinder,
+    multiple_filtered_grasp_poses,
+    single_grasp_poses,
+    tiago_pose,
+    save_pointcloud_world
 )
 
 from grasp_generator.utils.superquadric_functions import (
@@ -28,13 +34,21 @@ import rospkg
 import pdb
 from pandas  import *
 import os
+from scipy.spatial import KDTree
+import time
 
+# Messages
+from sensor_msgs.msg import PointCloud2
+from grasp_generator.server_clients.detect_client import detect_grasp_client
+from grasp_generator.utils.point_cloud_filtering import point_cloud_filter
 
 # Visualization
 from grasp_generator.visualization.visualization_superquadric import (
     visualize_superquadric,
     SingleSuperQuadric,
-    visualize_superquadric_true_segmentation
+    visualize_superquadric_true_segmentation,
+    visualize_grasps_pointcloud,
+    visualize_grasp_gpd_pointcloud
     )
 
 class Main:
@@ -58,9 +72,35 @@ class Main:
     
 
     def run(self):
-        if self.load:
-            partial_pointcloud, full_name, _ = load_pointcloud(
-                self.package_path + "/data/real_data/limonade")
+        pointcloud = rospy.wait_for_message(
+            self.topic_pointcloud_tiago, PointCloud2
+            )
+
+        scene_pointcloud, partial_pointcloud = point_cloud_filter(pointcloud, self.debug)
+        grasp_poses = detect_grasp_client(pointcloud)
+        grasp_positions = np.array([[g.position.x, g.position.y, g.position.z] for g in grasp_poses.grasps])
+
+        partial_tree = KDTree(partial_pointcloud)
+        dist, ids = partial_tree.query(grasp_positions)
+
+        index_filtered = [i for i in range(len(dist)) if dist[i] < 0.01]     # Threshold 0.005
+        ids_partial_filtered = ids[index_filtered]
+        filtered_grasps = [grasp_poses.grasps[x] for x in index_filtered]
+        gpd_final_grasp = filtered_grasps[0]
+        grasp_pose_gpd = tiago_pose(gpd_final_grasp)
+
+        left_lines, right_lines, middle_lines, hand_lines = multiple_filtered_grasp_poses(filtered_grasps)
+        left_line_gpd, right_line_gpd, middle_line_gpd, hand_line_gpd = single_grasp_poses(gpd_final_grasp)
+        visualize_grasp_gpd_pointcloud(scene_pointcloud, left_line_gpd, right_line_gpd, middle_line_gpd, hand_line_gpd, grasp_pose_gpd)
+
+        grasp_gpd = False
+        if grasp_gpd:
+            query_grasp = raw_input("Perform grasp with Right (r) or Left (l), enter r/l: ")
+            if query_grasp == 'l':
+                grasp_client = GraspClient("left")
+            else:
+                grasp_client = GraspClient("right")
+            result = grasp_client.run(grasp_pose_gpd)
 
         multiquadric = MultiquadricClient()
         superquadrics = multiquadric.run(point_cloud_to_message(partial_pointcloud))
@@ -85,7 +125,25 @@ class Main:
             pointsegmentation, distances = point_cloud_segmentation_cylinder(superquadrics, partial_pointcloud, labels, cylinder_pointsegmentations, request_ID)
         visualize_superquadric_true_segmentation(partial_pointcloud, superquadric_pointcloud, pointsegmentation)
 
-        pdb.set_trace()
+        grasp_id = np.array(np.where(ids == (ids_partial_filtered[(pointsegmentation == 0)[ids_partial_filtered] == True])[0]))
+        reasoning_final_grasp = grasp_poses.grasps[grasp_id[0][0]]
+
+        left_line_reasoning, right_line_reasoning, middle_line_reasoning, hand_line_reasoning = single_grasp_poses(reasoning_final_grasp)
+        visualize_grasps_pointcloud(scene_pointcloud, left_lines, right_lines, middle_lines, hand_lines, left_line_gpd, right_line_gpd, middle_line_gpd, hand_line_gpd, left_line_reasoning, right_line_reasoning, middle_line_reasoning, hand_line_reasoning, grasp_pose_gpd, grasp_pose_reasoning )
+
+        grasp_reasoning = True
+        if grasp_reasoning: 
+            grasp_pose_reasoning = tiago_pose(reasoning_final_grasp)        
+            grasp_client = GraspClient("right")
+            result = grasp_client.run(grasp_pose_reasoning)
+
+        logask = raw_input("Save current pointcoud? (y/n): ")
+        if logask == 'y':
+            time_stamp = time.time()
+            save_pointcloud_world("scene_pointcloud", scene_pointcloud, time_stamp)
+            save_pointcloud_world("partial_pointcloud", partial_pointcloud, time_stamp)
+        else: 
+            print("not saving\n")
 
 
 if __name__ == "__main__":
@@ -94,3 +152,6 @@ if __name__ == "__main__":
     main.run()
 
 
+        # if self.load:
+        #     partial_pointcloud, full_name, _ = load_pointcloud(
+        #         self.package_path + "/data/real_data/limonade")

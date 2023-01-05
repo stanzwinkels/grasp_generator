@@ -1,161 +1,4 @@
-# hierachical_ems: 
-#     OutlierRatio: 0.738             # prior outlier probability [0, 1) (default: 0.1)
-#     MaxIterationEM: 14            # maximum number of EM iterations (default: 20)
-#     ToleranceEM: 0.00630            # absolute tolerance of EM (default: 1e-3)
-#     RelativeToleranceEM: 0.928      # relative tolerance of EM (default: 1e-1)
-#     MaxOptiIterations: 2          # maximum number of optimization iterations per M (default: 2)
-#     Sigma: 0.3                    # 0.3 initial sigma^2 (default: 0 - auto generate)
-#     MaxiSwitch: 4                 # maximum number of switches allowed (default: 2)
-#     AdaptiveUpperBound: True      # Introduce adaptive upper bound to restrict the volume of SQ (default: false)
-#     Rescale: True                 # normalize the input point cloud (default: true)
-#     MaxLayer: 3                   # maximum depth
-#     Eps: 0.0401                     # 0.03 IMPORTANT: varies based on the size of the input pointcoud (DBScan parameter)
-#     MinPoints: 150                # DBScan parameter required minimum points
-#     Max_superquadrics: 4          # DBScan parameter required minimum points
-
-# # BOTTLE1
-# hierachical_ems: 
-#     OutlierRatio: 0.987             # prior outlier probability [0, 1) (default: 0.1)
-#     MaxIterationEM: 26            # maximum number of EM iterations (default: 20)
-#     ToleranceEM: 0.00757           # absolute tolerance of EM (default: 1e-3)
-#     RelativeToleranceEM: 0.595      # relative tolerance of EM (default: 1e-1)
-#     MaxOptiIterations: 2          # maximum number of optimization iterations per M (default: 2)
-#     Sigma: 0.3                    # 0.3 initial sigma^2 (default: 0 - auto generate)
-#     MaxiSwitch: 4                 # maximum number of switches allowed (default: 2)
-#     AdaptiveUpperBound: False      # Introduce adaptive upper bound to restrict the volume of SQ (default: false)
-#     Rescale: True                 # normalize the input point cloud (default: true)
-#     MaxLayer: 3                   # maximum depth
-#     Eps: 0.01347                     # 0.03 IMPORTANT: varies based on the size of the input pointcoud (DBScan parameter)
-#     MinPoints: 350                # DBScan parameter required minimum points
-#     Max_superquadrics: 4          # DBScan parameter required minimum points
-
-
-# # MUG1
-# hierachical_ems: 
-#     OutlierRatio: 0.989             # prior outlier probability [0, 1) (default: 0.1)
-#     MaxIterationEM: 16            # maximum number of EM iterations (default: 20)
-#     ToleranceEM: 0.00997           # absolute tolerance of EM (default: 1e-3)
-#     RelativeToleranceEM: 0.836      # relative tolerance of EM (default: 1e-1)
-#     MaxOptiIterations: 4          # maximum number of optimization iterations per M (default: 2)
-#     Sigma: 0.3                    # 0.3 initial sigma^2 (default: 0 - auto generate)
-#     MaxiSwitch: 4                 # maximum number of switches allowed (default: 2)
-#     AdaptiveUpperBound: True      # Introduce adaptive upper bound to restrict the volume of SQ (default: false)
-#     Rescale: True                 # normalize the input point cloud (default: true)
-#     MaxLayer: 3                   # maximum depth
-#     Eps: 0.0557459                     # 0.03 IMPORTANT: varies based on the size of the input pointcoud (DBScan parameter)
-#     MinPoints: 300                # DBScan parameter required minimum points
-#     Max_superquadrics: 4          # DBScan parameter required minimum points
-
-# # Hammer1
-# hierachical_ems: 
-#     OutlierRatio: 0.4098978400967614             # prior outlier probability [0, 1) (default: 0.1)
-#     MaxIterationEM: 26            # maximum number of EM iterations (default: 20)
-#     ToleranceEM: 0.008033694586603373           # absolute tolerance of EM (default: 1e-3)
-#     RelativeToleranceEM: 0.8760525535138906      # relative tolerance of EM (default: 1e-1)
-#     MaxOptiIterations: 2          # maximum number of optimization iterations per M (default: 2)
-#     Sigma: 0.3                    # 0.3 initial sigma^2 (default: 0 - auto generate)
-#     MaxiSwitch: 3                 # maximum number of switches allowed (default: 2)
-#     AdaptiveUpperBound: False      # Introduce adaptive upper bound to restrict the volume of SQ (default: false)
-#     Rescale: True                 # normalize the input point cloud (default: true)
-#     MaxLayer: 3                   # maximum depth
-#     Eps: 0.03581261682788677                # 0.03 IMPORTANT: varies based on the size of the input pointcoud (DBScan parameter)
-#     MinPoints: 350                # DBScan parameter required minimum points
-#     Max_superquadrics: 4          # DBScan parameter required minimum points
-
-
-# # pan1
-# hierachical_ems: 
-#     OutlierRatio: 0.5035468830669845             # prior outlier probability [0, 1) (default: 0.1)
-#     MaxIterationEM: 28            # maximum number of EM iterations (default: 20)
-#     ToleranceEM: 0.006901855554186116           # absolute tolerance of EM (default: 1e-3)
-#     RelativeToleranceEM: 0.593917119819028      # relative tolerance of EM (default: 1e-1)
-#     MaxOptiIterations: 2          # maximum number of optimization iterations per M (default: 2)
-#     Sigma: 0.3                    # 0.3 initial sigma^2 (default: 0 - auto generate)
-#     MaxiSwitch: 3                 # maximum number of switches allowed (default: 2)
-#     AdaptiveUpperBound: False      # Introduce adaptive upper bound to restrict the volume of SQ (default: false)
-#     Rescale: True                 # normalize the input point cloud (default: true)
-#     MaxLayer: 3                   # maximum depth
-#     Eps: 0.021927362088467704                # 0.03 IMPORTANT: varies based on the size of the input pointcoud (DBScan parameter)
-#     MinPoints: 350                # DBScan parameter required minimum points
-#     Max_superquadrics: 4          # DBScan parameter required minimum points
-
-
-
-# # ladle1
-# hierachical_ems: 
-#     OutlierRatio: 0.6763847422326749             # prior outlier probability [0, 1) (default: 0.1)
-#     MaxIterationEM: 28            # maximum number of EM iterations (default: 20)
-#     ToleranceEM: 0.004242451184159441           # absolute tolerance of EM (default: 1e-3)
-#     RelativeToleranceEM: 0.6219430644680958      # relative tolerance of EM (default: 1e-1)
-#     MaxOptiIterations: 2          # maximum number of optimization iterations per M (default: 2)
-#     Sigma: 0.3                    # 0.3 initial sigma^2 (default: 0 - auto generate)
-#     MaxiSwitch: 3                 # maximum number of switches allowed (default: 2)
-#     AdaptiveUpperBound: False      # Introduce adaptive upper bound to restrict the volume of SQ (default: false)
-#     Rescale: True                 # normalize the input point cloud (default: true)
-#     MaxLayer: 3                   # maximum depth
-#     Eps: 0.04889390004802012                # 0.03 IMPORTANT: varies based on the size of the input pointcoud (DBScan parameter)
-#     MinPoints: 350                # DBScan parameter required minimum points
-#     Max_superquadrics: 4          # DBScan parameter required minimum points
-
-
-# # Mug1
-# hierachical_ems: 
-#     OutlierRatio: 0.20002297494468502             # prior outlier probability [0, 1) (default: 0.1)
-#     MaxIterationEM: 16            # maximum number of EM iterations (default: 20)
-#     ToleranceEM: 0.00916087584223929           # absolute tolerance of EM (default: 1e-3)
-#     RelativeToleranceEM: 0.4346277420064464      # relative tolerance of EM (default: 1e-1)
-#     MaxOptiIterations: 2          # maximum number of optimization iterations per M (default: 2)
-#     Sigma: 0.3                    # 0.3 initial sigma^2 (default: 0 - auto generate)
-#     MaxiSwitch: 4                 # maximum number of switches allowed (default: 2)
-#     AdaptiveUpperBound: True      # Introduce adaptive upper bound to restrict the volume of SQ (default: false)
-#     Rescale: True                 # normalize the input point cloud (default: true)
-#     MaxLayer: 3                   # maximum depth
-#     Eps: 0.045943678148029354                # 0.03 IMPORTANT: varies based on the size of the input pointcoud (DBScan parameter)
-#     MinPoints: 350                # DBScan parameter required minimum points
-#     Max_superquadrics: 4          # DBScan parameter required minimum points
-
-
-
-# Mug1
-# hierachical_ems: 
-#     OutlierRatio: 0.478935682336461             # prior outlier probability [0, 1) (default: 0.1)
-#     MaxIterationEM: 22            # maximum number of EM iterations (default: 20)
-#     ToleranceEM: 0.007184507187941584           # absolute tolerance of EM (default: 1e-3)
-#     RelativeToleranceEM: 0.2837702448567722      # relative tolerance of EM (default: 1e-1)
-#     MaxOptiIterations: 2          # maximum number of optimization iterations per M (default: 2)
-#     Sigma: 0.3                    # 0.3 initial sigma^2 (default: 0 - auto generate)
-#     MaxiSwitch: 1                 # maximum number of switches allowed (default: 2)
-#     AdaptiveUpperBound: True      # Introduce adaptive upper bound to restrict the volume of SQ (default: false)
-#     Rescale: True                 # normalize the input point cloud (default: true)
-#     MaxLayer: 3                   # maximum depth
-#     Eps: 0.04459332835539593                # 0.03 IMPORTANT: varies based on the size of the input pointcoud (DBScan parameter)
-#     MinPoints: 100                # DBScan parameter required minimum points
-#     Max_superquadrics: 4          # DBScan parameter required minimum points
-
-
-# PAN1
-# hierachical_ems: 
-#     OutlierRatio: 0.8035832648938089             # prior outlier probability [0, 1) (default: 0.1)
-#     MaxIterationEM: 18            # maximum number of EM iterations (default: 20)
-#     ToleranceEM: 0.007639972789775823           # absolute tolerance of EM (default: 1e-3)
-#     RelativeToleranceEM: 0.9591634925179979      # relative tolerance of EM (default: 1e-1)
-#     MaxOptiIterations: 2          # maximum number of optimization iterations per M (default: 2)
-#     Sigma: 0.3                    # 0.3 initial sigma^2 (default: 0 - auto generate)
-#     MaxiSwitch: 1                 # maximum number of switches allowed (default: 2)
-#     AdaptiveUpperBound: True      # Introduce adaptive upper bound to restrict the volume of SQ (default: false)
-#     Rescale: True                 # normalize the input point cloud (default: true)
-#     MaxLayer: 4                   # maximum depth
-#     Eps: 0.028594564805020577                # 0.03 IMPORTANT: varies based on the size of the input pointcoud (DBScan parameter)
-#     MinPoints: 50                # default: 500 DBScan parameter required minimum points
-#     Max_superquadrics: 4          # DBScan parameter required minimum points
-
-# [I 2022-11-22 16:08:48,723] Trial 98 finished with value: 0.0510390906708151 and parameters: {'OutlierRatio': 0.7651198040847393, 'MaxIterationEM': 18, 'ToleranceEM': 0.006993253686452148, 'RelativeToleranceEM': 0.5097019717564042, 'MaxiSwitch': 3, 'AdaptiveUpperBound': True, 'Rescale': True, 'MaxLayer': 2, 'Eps': 0.031929739230175426, 'MinPoints': 300}. Best is trial 98 with value: 0.0510390906708151.
-
-
-# 'OutlierRatio': 0.6779996291303284, 'MaxIterationEM': 20, 'ToleranceEM': 0.0030120343445337585, 'RelativeToleranceEM': 0.061114920143992564, 'MaxiSwitch': 2,
-#  'Eps': 0.060052805103441326, 'MinPoints': 400}. Best is trial 45 with value: 0.25933151676589933.
-
-
+####    SIMULATION PARAMETERS ####
 hierachical_ems: 
     OutlierRatio: 0.9650408061736067                # prior outlier probability [0, 1) (default: 0.1)
     MaxIterationEM: 18                              # maximum number of EM iterations (default: 20)
@@ -171,3 +14,20 @@ hierachical_ems:
     MinPoints: 100                                  # default: 500 DBScan parameter required minimum points
     Max_superquadrics: 4                            # DBScan parameter required minimum points
 
+
+
+#### REAL WORLD PARAMETERS ####
+# hierachical_ems: 
+#     OutlierRatio: 0.9955271167239488                # prior outlier probability [0, 1) (default: 0.1)
+#     MaxIterationEM: 18                              # maximum number of EM iterations (default: 20)
+#     ToleranceEM: 0.004304036224804307              # absolute tolerance of EM (default: 1e-3)
+#     RelativeToleranceEM: 0.803576732836785         # relative tolerance of EM (default: 1e-1)
+#     MaxOptiIterations: 2                            # maximum number of optimization iterations per M (default: 2)
+#     Sigma: 0.3                                      # 0.3 initial sigma^2 (default: 0 - auto generate)
+#     MaxiSwitch: 2                                  # maximum number of switches allowed (default: 2)
+#     AdaptiveUpperBound: True                        # Introduce adaptive upper bound to restrict the volume of SQ (default: false)
+#     Rescale: True                                   # normalize the input point cloud (default: true)
+#     MaxLayer: 4                                     # maximum depth
+#     Eps: 0.03968163127120671                       # 0.03 IMPORTANT: varies based on the size of the input pointcoud (DBScan parameter)
+#     MinPoints: 150                                  # default: 500 DBScan parameter required minimum points
+#     Max_superquadrics: 4                            # DBScan parameter required minimum points

@@ -1,0 +1,14 @@
+products:
+  limonade:
+    part1:
+      x: 0.07
+      y: 0.07
+      z: 0.17
+    part2:
+      x: 0.03
+      y: 0.03
+      z: 0.035
+    dist: 
+      x: 0.00
+      y: 0.00
+      z: 0.14

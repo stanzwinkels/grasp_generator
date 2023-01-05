@@ -15,6 +15,7 @@ import pickle
 import pdb
 from scipy.spatial import KDTree
 from pyquaternion import Quaternion
+import rospkg
 
 # messages
 from geometry_msgs.msg import Pose, PoseStamped, Point32
@@ -233,6 +234,13 @@ def save_pointcloud(pointcloud, product, location, timestamp):
     else: 
         print("not saving\n")
     return 
+
+
+def save_pointcloud_world(name, pointcloud, time_stamp): 
+        package_path = rospkg.RosPack().get_path("grasp_generator")
+        pcd = o3d.geometry.PointCloud()
+        pcd.points = o3d.utility.Vector3dVector(pointcloud)
+        o3d.io.write_point_cloud(package_path + "/data/experiment_data/"+name + '.ply', pcd,  write_ascii=True, compressed=False, print_progress=True)
 
 
 def filter_full_pointcloud(pointcloud_gt, colors_gt):   
@@ -556,3 +564,53 @@ def single_grasp_poses(grasp_pose):
     hand_line = np.stack((base_center, approach_center))
 
     return left_line, right_line, middle_line, hand_line
+
+
+def multiple_filtered_grasp_poses(grasp_poses):
+    left_lines = []
+    right_lines = []
+    middle_lines = []
+    hand_lines = []
+    for grasp in grasp_poses: 
+        grasp_position = np.array([grasp.position.x, grasp.position.y, grasp.position.z])
+        grasp_approach = np.array([grasp.approach.x, grasp.approach.y, grasp.approach.z])
+        grasp_binormal = np.array([grasp.binormal.x, grasp.binormal.y, grasp.binormal.z])
+        grasp_axis = np.array([grasp.axis.x, grasp.axis.y, grasp.axis.z])
+        
+        rotation_matrix = np.eye(4)
+        rotation_matrix[0:3,0] = grasp_approach
+        rotation_matrix[0:3,1] = grasp_binormal
+        rotation_matrix[0:3,2] = grasp_axis
+
+
+        # Change this yaml parameters automatically!
+        hand_depth = 0.06
+        hand_height = 0.02
+        outer_diameter = 0.12
+        finger_width = 0.01
+        
+        hw = 0.5 * outer_diameter - 0.5 * finger_width
+        left_bottom = grasp_position - hw * grasp_binormal
+        right_bottom = grasp_position + hw * grasp_binormal
+        left_top = left_bottom + hand_depth * grasp_approach
+        right_top = right_bottom + hand_depth * grasp_approach
+        left_center = left_bottom + 0.5*(left_top - left_bottom)
+        right_center = right_bottom + 0.5*(right_top - right_bottom)
+        base_center = left_bottom + 0.5*(right_bottom - left_bottom) - 0.01*grasp_approach
+        approach_center = base_center - 0.04*grasp_approach
+
+        left_line = np.stack((left_bottom, left_top))
+        right_line = np.stack((right_bottom, right_top))
+        middle_line = np.stack((left_bottom, right_bottom))
+        hand_line = np.stack((base_center, approach_center))
+
+        left_lines.append(left_line)
+        right_lines.append(right_line)
+        middle_lines.append(middle_line)
+        hand_lines.append(hand_line)
+
+    left_lines = np.array(left_lines)
+    right_lines = np.array(right_lines)
+    middle_lines = np.array(middle_lines)
+    hand_lines = np.array(hand_lines)
+    return left_lines, right_lines, middle_lines, hand_lines

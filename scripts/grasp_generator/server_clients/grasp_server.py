@@ -3,15 +3,19 @@
 # ros
 import rospy
 import actionlib
-
+import pdb
 # import messages
 from grasp_generator.msg import GraspAction, GraspResult, GraspFeedback
 from play_motion_msgs.msg import PlayMotionAction, PlayMotionGoal
 from sensor_msgs.msg import JointState
-from geometry_msgs.msg import PoseStamped 
+from geometry_msgs.msg import Pose, PoseStamped 
+
+
 
 # For arm control
 import moveit_commander
+from moveit_msgs.msg import CollisionObject
+from shape_msgs.msg import SolidPrimitive
 import tf
 
 # utilities
@@ -57,23 +61,61 @@ class GraspActionClass(object):
         self._scene.remove_attached_object(link=eef_link)
         self._scene.remove_world_object()
 
-        # 1. Go to prior position
-        neutral_goal = PoseStamped()
-        neutral_goal.pose.position.x = 0.2
-        neutral_goal.pose.position.y = -0.3
-        neutral_goal.pose.position.z = 1.2
-        neutral_goal.pose.orientation.x = 0
-        neutral_goal.pose.orientation.y = 0
-        neutral_goal.pose.orientation.z = 0
-        neutral_goal.pose.orientation.w = 0
-        neutral_goal.header.frame_id = "base_footprint"
-        self._group.set_pose_target(neutral_goal)
-        succeeded = self._group.go(wait=True)
-        if not succeeded:
-            self._result.success=succeeded
-            return self._as.set_succeeded(self._result)
+        # 0.1. prerequisite: Add table as collision object in MoveIt
+        coll_obj = CollisionObject()
+        coll_obj.header.frame_id = self._robot.get_planning_frame()
+        coll_obj.operation = coll_obj.ADD
+        box = SolidPrimitive()
+        box.type = box.BOX
+        box.dimensions = [1.50, 1.50, 0.8]
+        coll_obj.id = "table"
+        coll_obj.primitives.append(box)
 
-        
+        cube_pose = Pose()
+        cube_pose.position.x = 1.25
+        cube_pose.position.y = 0.0
+        cube_pose.position.z = 0.4
+        cube_pose.orientation.w = 1.0
+        coll_obj.primitive_poses.append(cube_pose)
+        self._scene.add_object(coll_obj)
+        rospy.sleep(1)
+        print("TABLE ADDED!")
+
+        pdb.set_trace()
+        # 1. Go to prior position
+        if self._side == "right": 
+            neutral_goal = PoseStamped()
+            neutral_goal.pose.position.x = 0.2
+            neutral_goal.pose.position.y = -0.3
+            neutral_goal.pose.position.z = 1.2
+            neutral_goal.pose.orientation.x = 0
+            neutral_goal.pose.orientation.y = 0
+            neutral_goal.pose.orientation.z = 0
+            neutral_goal.pose.orientation.w = 0
+            neutral_goal.header.frame_id = "base_footprint"
+            self._group.set_pose_target(neutral_goal)
+            succeeded = self._group.go(wait=True)
+            if not succeeded:
+                self._result.success=succeeded
+                return self._as.set_succeeded(self._result)
+
+        if self._side == "left": 
+            neutral_goal = PoseStamped()
+            neutral_goal.pose.position.x = 0.2
+            neutral_goal.pose.position.y = 0.3
+            neutral_goal.pose.position.z = 1.2
+            neutral_goal.pose.orientation.x = 0
+            neutral_goal.pose.orientation.y = 0
+            neutral_goal.pose.orientation.z = 0
+            neutral_goal.pose.orientation.w = 0
+            neutral_goal.header.frame_id = "base_footprint"
+            self._group.set_pose_target(neutral_goal)
+            succeeded = self._group.go(wait=True)
+            if not succeeded:
+                self._result.success=succeeded
+                return self._as.set_succeeded(self._result)
+
+
         # 2. Go to pre-grasp position
         goal = PoseStamped()
         goal.pose = pose.pose
@@ -85,7 +127,6 @@ class GraspActionClass(object):
             self._result.success=succeeded
             return self._as.set_succeeded(self._result)
 
-
         # 2.2 Go to grasp position linearly
         vector = rotate_vector([0.10,0,0], [goal.pose.orientation.x, goal.pose.orientation.y, goal.pose.orientation.z, goal.pose.orientation.w])
         goal.pose.position.x += vector[0]
@@ -94,7 +135,6 @@ class GraspActionClass(object):
         goal_map_frame = self._tl.transformPose("map", goal)
         (plan, _) = self._group.compute_cartesian_path([goal_map_frame.pose], 0.01, 0.0)
         succeeded = self._group.execute(plan, wait=True)
-
 
         # 3. close gripper and attach collision object
         gripper.run('close')
@@ -109,7 +149,6 @@ class GraspActionClass(object):
         if not succeeded:
             self._result.success=succeeded
             return self._as.set_succeeded(self._result)
-
 
         # 5. return arm to tuck
         client = actionlib.SimpleActionClient("play_motion", PlayMotionAction)
@@ -134,5 +173,5 @@ if __name__ == "__main__":
     rospy.loginfo("grasp servers started")
 
     GraspActionClass(side="right")
-    GraspActionClass(side="left")
+    # GraspActionClass(side="left")
     rospy.spin()
