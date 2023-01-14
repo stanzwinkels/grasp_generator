@@ -23,37 +23,43 @@ def point_cloud_filter(point_cloud_raw, debug):
     point_cloud_xyz = ros_numpy.point_cloud2.pointcloud2_to_xyz_array(point_cloud_raw)
     point_cloud = o3d.geometry.PointCloud()
     point_cloud.points = o3d.utility.Vector3dVector(np.array(point_cloud_xyz))
-
-    # if debug:
-    #     o3d.visualization.draw_geometries([point_cloud])
+    # o3d.visualization.draw_geometries([point_cloud])
 
     # 1. crop area perceived pointcloud
     lb = point_cloud.get_min_bound()
     ub = point_cloud.get_max_bound()
 
-    ub[-1] = rospy.get_param('perception_area/max_depth_threshold')
-    ub[0] = rospy.get_param('perception_area/min_depth_threshold')
-    ub[1] =  rospy.get_param('perception_area/max_width_threshold')
-    lb[0] = rospy.get_param('perception_area/min_width_threshold')
+    ub[-1] = 0.8
+    ub[0] =  0.1
+    ub[1] =  2.0
+    lb[0] =  -1.2
+
+    print(ub)
+    print(lb)
+
+    # print(rospy.get_param('perception_area/max_depth_threshold'))
+    # print(rospy.get_param('perception_area/min_depth_threshold'))
+    # print(rospy.get_param('perception_area/max_width_threshold'))
+    # print(rospy.get_param('perception_area/min_width_threshold'))
 
     min_bound = lb
     max_bound = ub
 
     box = o3d.geometry.AxisAlignedBoundingBox(min_bound, max_bound)
     point_cloud_crop = point_cloud.crop(box)
-    # if debug:
-    #     o3d.visualization.draw_geometries([point_cloud])
+    # o3d.visualization.draw_geometries([point_cloud_crop])
 
     # 2. remove table perceived pointcloud
     plane_model, inliers = point_cloud_crop.segment_plane(
-        distance_threshold=rospy.get_param('plane_segmentation/distance_threshold'), 
+        # distance_threshold=rospy.get_param('plane_segmentation/distance_threshold'), 
+        distance_threshold=0.01, 
+
         ransac_n=rospy.get_param('plane_segmentation/ransac_n'), 
         num_iterations=rospy.get_param('plane_segmentation/num_iterations')
     )
 
     partial_point_cloud = point_cloud_crop.select_down_sample(inliers, invert=True)
-    if debug:
-        o3d.visualization.draw_geometries([partial_point_cloud])
+    o3d.visualization.draw_geometries([partial_point_cloud])
 
     # mesh = False
     # if mesh: 

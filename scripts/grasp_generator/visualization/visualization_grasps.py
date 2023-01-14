@@ -9,6 +9,7 @@ Context: This file is made specifically for visualizing in RVIZ and in 3d plot.
 # Ros imports
 import rospy
 import numpy as np
+import pdb
 
 # Visualization messages
 from geometry_msgs.msg import Pose
@@ -26,7 +27,7 @@ import plotly.graph_objects as go
 from scipy.spatial.transform import Rotation as R
 from itertools import cycle
 
-
+import numpy as np
 palette = cycle(['black', 'red', 'green', 'orange', 'yellow', 'purple', 'grey'])     
 
 
@@ -47,6 +48,40 @@ def pub_grasp_pose(grasp, frame_id):
     grasp_marker.color.b = 0.0
     afford_pub.publish(grasp_marker)
     return
+
+
+
+def visualize_grasp(grasp_pose, frame_id, name):
+    grasp = rospy.Publisher(name, VisArrayMarker, queue_size=100, latch= True)
+    array_marker = VisArrayMarker()
+
+    pose = Pose()
+    pose.position.x = grasp_pose.position.x
+    pose.position.y = grasp_pose.position.y
+    pose.position.z = grasp_pose.position.z
+
+    marker = VisMarker()
+    marker.header.frame_id = frame_id # 
+    marker.header.stamp = rospy.Time()
+    marker.ns = "points"
+    marker.id = 0
+    marker.type = VisMarker.SPHERE
+    marker.action = VisMarker.ADD
+    marker.pose.orientation.w = 1.0
+    # marker.points = [grasp_pose.position]   
+    marker.pose.position = grasp_pose.position
+    marker.scale.x = 0.1 # forward direction
+    marker.scale.y = 0.1 # hand closing direction
+    marker.scale.z = 0.1 # hand vertical direction
+    marker.color.a = 1.0
+    marker.color.r = 0.0
+    marker.color.g = 0.0
+    marker.color.b = 1.0
+    marker.lifetime = rospy.Duration()
+    array_marker.markers.append(marker)
+    grasp.publish(array_marker)   
+    return
+
 
 
 def plot_affordance(poly, name, frame, color=[1,0,0,1]):

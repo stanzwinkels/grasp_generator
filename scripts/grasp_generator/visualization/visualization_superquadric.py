@@ -801,7 +801,7 @@ def visualize_grasps_pointcloud(scene_pointcloud, left_lines, right_lines, middl
 
        
 
-def  visualize_grasp_gpd_pointcloud(scene_pointcloud, left_line_gpd, right_line_gpd, middle_line_gpd, hand_line_gpd, grasp_pose_gpd):
+def  visualize_grasp_gpd_pointcloud(scene_pointcloud, left_line_gpd, right_line_gpd, middle_line_gpd, hand_line_gpd, grasp_pose_gpd, end_pose):
     fig = go.Figure()
     fig.add_trace(
         go.Scatter3d(
@@ -874,6 +874,48 @@ def  visualize_grasp_gpd_pointcloud(scene_pointcloud, left_line_gpd, right_line_
                         color="black",
                         opacity=0.7)))
 
+
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'end_pose',
+            showlegend=True,
+            x=[end_pose.position.x], 
+            y=[end_pose.position.y], 
+            z=[end_pose.position.z],
+            mode = 'markers', 
+            marker=dict(size=3, 
+                        color="red",
+                        opacity=0.7)))
+
+    fig.update_scenes(
+        xaxis_visible=False, 
+        yaxis_visible=False,
+        zaxis_visible=False,
+    )
+
+    fig.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        showlegend=True)
+    fig.show()
+    return
+
+
+
+
+def  visualize_partial_pointcloud(partial_pointcloud):
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'partial pointcloud',
+            showlegend=True,
+            x=partial_pointcloud[:,0], 
+            y=partial_pointcloud[:,1], 
+            z=partial_pointcloud[:,2],
+            mode = 'markers', 
+            marker=dict(size=1, 
+                        color="blue",
+                        opacity=0.7)))
 
     fig.update_scenes(
         xaxis_visible=False, 
