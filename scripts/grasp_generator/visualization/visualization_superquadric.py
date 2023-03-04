@@ -11,7 +11,7 @@ from pyquaternion import Quaternion
 
 import pdb
 # palette = cycle(['black', 'red', 'green', 'orange', 'yellow', 'purple', 'grey'])     
-palette = cycle(['black', 'red', 'green'])     
+palette = cycle(['purple', 'green', 'orange'])     
 palette2 = cycle(['black', 'red', 'green'])     
 
 
@@ -64,7 +64,7 @@ def visualize_superquadric(pointcloud, superquadrics):
                 alphahull= 0,                 
                 # color='grey',
                 color=next(palette),
-                opacity=0.50))
+                opacity=0.5))
     fig.add_trace(
         go.Scatter3d(
             name = 'pointcloud',
@@ -73,7 +73,7 @@ def visualize_superquadric(pointcloud, superquadrics):
             mode = 'markers', 
             marker=dict(size=1, 
                         color='blue',
-                        opacity=0.7)))
+                        opacity=1.0)))
     fig.update_scenes(
         xaxis_visible=False, 
         yaxis_visible=False,
@@ -185,7 +185,20 @@ def visualize_superquadric_true_segmentation(pointcloud, superquadrics, closest_
                 y=superquadric[:,1], 
                 z=superquadric[:,2], 
                 alphahull= 0,                 
-                color=next(palette),
+                color="grey",
+                opacity=0.50))
+
+
+    for idx, superquadric in enumerate(superquadrics):        
+        fig.add_trace(
+            go.Mesh3d(
+                name = 'superquadric '+ str(idx+1),
+                showlegend=True,
+                x=superquadric[:,0], 
+                y=superquadric[:,1], 
+                z=superquadric[:,2], 
+                alphahull= 0,                 
+                color="red",
                 opacity=0.50))
 
     fig.add_trace(
@@ -474,101 +487,101 @@ def visualize_scene_pointcloud(scene_pointcloud, left_lines, right_lines, middle
                             color="orange",
                             opacity=0.7)))
 
-    fig.add_trace(
-        go.Scatter3d(
-            name = 'Hand',
-            showlegend=True,
-            x=gpd_left_line[:,0], 
-            y=gpd_left_line[:,1], 
-            z=gpd_left_line[:,2],
-            mode = 'lines', 
-            marker=dict(size=2, 
-                        color="red",
-                        opacity=0.7)))
+    # fig.add_trace(
+    #     go.Scatter3d(
+    #         name = 'Hand',
+    #         showlegend=True,
+    #         x=gpd_left_line[:,0], 
+    #         y=gpd_left_line[:,1], 
+    #         z=gpd_left_line[:,2],
+    #         mode = 'lines', 
+    #         marker=dict(size=2, 
+    #                     color="red",
+    #                     opacity=0.7)))
 
-    fig.add_trace(
-        go.Scatter3d(
-            name = 'Hand',
-            showlegend=True,
-            x=gpd_right_line[:,0], 
-            y=gpd_right_line[:,1], 
-            z=gpd_right_line[:,2],
-            mode = 'lines', 
-            marker=dict(size=2, 
-                        color="red",
-                        opacity=0.7)))
+    # fig.add_trace(
+    #     go.Scatter3d(
+    #         name = 'Hand',
+    #         showlegend=True,
+    #         x=gpd_right_line[:,0], 
+    #         y=gpd_right_line[:,1], 
+    #         z=gpd_right_line[:,2],
+    #         mode = 'lines', 
+    #         marker=dict(size=2, 
+    #                     color="red",
+    #                     opacity=0.7)))
 
-    fig.add_trace(
-        go.Scatter3d(
-            name = 'Hand',
-            showlegend=True,
-            x=gpd_middle_line[:,0], 
-            y=gpd_middle_line[:,1], 
-            z=gpd_middle_line[:,2],
-            mode = 'lines', 
-            marker=dict(size=2, 
-                        color="red",
-                        opacity=0.7)))
+    # fig.add_trace(
+    #     go.Scatter3d(
+    #         name = 'Hand',
+    #         showlegend=True,
+    #         x=gpd_middle_line[:,0], 
+    #         y=gpd_middle_line[:,1], 
+    #         z=gpd_middle_line[:,2],
+    #         mode = 'lines', 
+    #         marker=dict(size=2, 
+    #                     color="red",
+    #                     opacity=0.7)))
 
-    fig.add_trace(
-        go.Scatter3d(
-            name = 'Hand',
-            showlegend=True,
-            x=gpd_hand_line[:,0], 
-            y=gpd_hand_line[:,1], 
-            z=gpd_hand_line[:,2],
-            mode = 'lines', 
-            marker=dict(size=2, 
-                        color="red",
-                        opacity=0.7)))
+    # fig.add_trace(
+    #     go.Scatter3d(
+    #         name = 'Hand',
+    #         showlegend=True,
+    #         x=gpd_hand_line[:,0], 
+    #         y=gpd_hand_line[:,1], 
+    #         z=gpd_hand_line[:,2],
+    #         mode = 'lines', 
+    #         marker=dict(size=2, 
+    #                     color="red",
+    #                     opacity=0.7)))
 
-    fig.add_trace(
-        go.Scatter3d(
-            name = 'Hand',
-            showlegend=True,
-            x=reasoning_left_line[:,0], 
-            y=reasoning_left_line[:,1], 
-            z=reasoning_left_line[:,2],
-            mode = 'lines', 
-            marker=dict(size=2, 
-                        color="green",
-                        opacity=0.7)))
+    # fig.add_trace(
+    #     go.Scatter3d(
+    #         name = 'Hand',
+    #         showlegend=True,
+    #         x=reasoning_left_line[:,0], 
+    #         y=reasoning_left_line[:,1], 
+    #         z=reasoning_left_line[:,2],
+    #         mode = 'lines', 
+    #         marker=dict(size=2, 
+    #                     color="green",
+    #                     opacity=0.7)))
 
-    fig.add_trace(
-        go.Scatter3d(
-            name = 'Hand',
-            showlegend=True,
-            x=reasoning_right_line[:,0], 
-            y=reasoning_right_line[:,1], 
-            z=reasoning_right_line[:,2],
-            mode = 'lines', 
-            marker=dict(size=2, 
-                        color="green",
-                        opacity=0.7)))
+    # fig.add_trace(
+    #     go.Scatter3d(
+    #         name = 'Hand',
+    #         showlegend=True,
+    #         x=reasoning_right_line[:,0], 
+    #         y=reasoning_right_line[:,1], 
+    #         z=reasoning_right_line[:,2],
+    #         mode = 'lines', 
+    #         marker=dict(size=2, 
+    #                     color="green",
+    #                     opacity=0.7)))
 
-    fig.add_trace(
-        go.Scatter3d(
-            name = 'Hand',
-            showlegend=True,
-            x=reasoning_middle_line[:,0], 
-            y=reasoning_middle_line[:,1], 
-            z=reasoning_middle_line[:,2],
-            mode = 'lines', 
-            marker=dict(size=2, 
-                        color="green",
-                        opacity=0.7)))
+    # fig.add_trace(
+    #     go.Scatter3d(
+    #         name = 'Hand',
+    #         showlegend=True,
+    #         x=reasoning_middle_line[:,0], 
+    #         y=reasoning_middle_line[:,1], 
+    #         z=reasoning_middle_line[:,2],
+    #         mode = 'lines', 
+    #         marker=dict(size=2, 
+    #                     color="green",
+    #                     opacity=0.7)))
 
-    fig.add_trace(
-        go.Scatter3d(
-            name = 'Hand',
-            showlegend=True,
-            x=reasoning_hand_line[:,0], 
-            y=reasoning_hand_line[:,1], 
-            z=reasoning_hand_line[:,2],
-            mode = 'lines', 
-            marker=dict(size=2, 
-                        color="green",
-                        opacity=0.7)))
+    # fig.add_trace(
+    #     go.Scatter3d(
+    #         name = 'Hand',
+    #         showlegend=True,
+    #         x=reasoning_hand_line[:,0], 
+    #         y=reasoning_hand_line[:,1], 
+    #         z=reasoning_hand_line[:,2],
+    #         mode = 'lines', 
+    #         marker=dict(size=2, 
+    #                     color="green",
+    #                     opacity=0.7)))
 
                
     fig.update_scenes(
@@ -923,6 +936,69 @@ def  visualize_partial_pointcloud(partial_pointcloud):
         zaxis_visible=False,
     )
 
+    fig.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        showlegend=True)
+    fig.show()
+    return
+
+
+def visualize_hierarchical(input_points1, input_points2, input_points3, pointcloud, superquadrics):
+    fig = go.Figure()
+    for idx, superquadric in enumerate(superquadrics):        
+        fig.add_trace(
+            go.Mesh3d(
+                name = 'superquadric '+ str(idx+1),
+                showlegend=True,
+                x=superquadric[:,0], y=superquadric[:,1], z=superquadric[:,2], 
+                alphahull= 0,                 
+                # color='grey',
+                color=next(palette),
+                opacity=1.0))
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'pointcloud',
+            showlegend=True,
+            x=pointcloud[:,0], y=pointcloud[:,1], z=pointcloud[:,2],
+            mode = 'markers', 
+            marker=dict(size=0.5, 
+                        color='blue',
+                        opacity=1.0)))
+
+
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'input1',
+            showlegend=True,
+            x=input_points1[:,0], y=input_points1[:,1], z=input_points1[:,2],
+            mode = 'markers', 
+            marker=dict(size=1, 
+                        color='blue',
+                        opacity=1.0)))
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'input2',
+            showlegend=True,
+            x=input_points2[:,0], y=input_points2[:,1], z=input_points2[:,2],
+            mode = 'markers', 
+            marker=dict(size=1, 
+                        color='blue',
+                        opacity=1.0)))
+    fig.add_trace(
+        go.Scatter3d(
+            name = 'input3',
+            showlegend=True,
+            x=input_points3[:,0], y=input_points3[:,1], z=input_points3[:,2],
+            mode = 'markers', 
+            marker=dict(size=1, 
+                        color='blue',
+                        opacity=1.0)))
+
+    fig.update_scenes(
+        xaxis_visible=False, 
+        yaxis_visible=False,
+        zaxis_visible=False)
     fig.update_layout(
         plot_bgcolor="white",
         paper_bgcolor="white",

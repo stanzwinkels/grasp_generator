@@ -274,8 +274,8 @@ def transform_partial_pointcloud_origin(package_path, partial_pointcloud, name):
     # directory_camera_position_product = package_path + "/data/test_data/camera_position_product.json"
     # directory_product_orientation_camera = package_path + "/data/test_data/product_orientation_camera.json"
 
-    directory_camera_position_product = package_path + "/data/GPD_data/camera_position_product.json"
-    directory_product_orientation_camera = package_path + "/data/GPD_data/product_orientation_camera.json"
+    directory_camera_position_product = package_path + "/data/test_data/camera_position_product.json"
+    directory_product_orientation_camera = package_path + "/data/test_data/product_orientation_camera.json"
 
     camera_position_product = json.load(open(directory_camera_position_product))
     product_orientation_camera = json.load(open(directory_product_orientation_camera))

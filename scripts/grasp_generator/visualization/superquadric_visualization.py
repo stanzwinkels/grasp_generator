@@ -1,3 +1,5 @@
+#!/usr/bin/env python3.6
+
 import numpy as np
 import matplotlib
 matplotlib.use('TkAgg')
@@ -34,7 +36,7 @@ class SuperQuadric():
         return x , y , z 
 
     def visualize(self):
-        x,y,z = self.tens_fld(self.x, self.y, self.z, self.beta, self.alpha)
+        x,y,z = self.tens_fld(self.x, self.y, self.z, self.alpha, self.beta)
         col = np.arange(len(x)**2)
         fig = plt.figure()
         ax3D = fig.add_subplot(111, projection='3d')
@@ -50,39 +52,30 @@ def comp_superquadric(points, scale, eps):
     return np.array(values)
 
 
-# scale = np.array([1,1,1])
-# alpha = [1.9, 1.7, 1.5, 1.3, 1.1, 0.9, 0.7, 0.5, 0.3, 0.1]
-# beta = [1.9, 1.7, 1.5, 1.3, 1.1, 0.9, 0.7, 0.5, 0.3, 0.1]
+scale = np.array([1,1,1])
 
+# alpha = [0.1, 0.5, 1.0, 1.5, 1.9]
+# beta =  [0.1, 0.5, 1.0, 1.5, 1.9]
 
-# alpha = [0.1, 0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5, 1.7, 1.9]
-# beta = [1.9, 1.7, 1.5, 1.3, 1.1, 0.9, 0.7, 0.5, 0.3, 0.1]
-
-# alpha = [1.9, 1.7, 1.5, 1.3, 1.1, 0.9, 0.7, 0.5, 0.3, 0.1]
-# beta = [0.1, 0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5, 1.7, 1.9]
-
-# alpha = [0.1, 0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5, 1.7, 1.9]
-# beta = [0.1, 0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5, 1.7, 1.9]
+# beta = [1.9, 1.5, 1.0, 0.5, 0.1]
+beta = [1.9, 1.5, 1.0, 0.5, 0.1]
+alpha = [0.1, 0.5, 1.0, 1.5, 1.9]
+# alpha = [1.9, 1.5, 1.0, 0.5, 0.1]
 
 
 # fig = make_subplots(
 #     rows=len(alpha), cols=len(beta),
-#     specs=[[{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
-#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
-#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
-#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
-#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
-#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
-#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
-#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
-#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
-#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}]]
+#     specs=[[{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
+#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
+#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
+#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}],
+#            [{'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}, {'type': 'surface'}]]
 #     )
 
 
 # for i in range(len(alpha)):
 #     for j in range(len(beta)):
-#         print(i, j)
+#         print(beta[i], alpha[j])
 #         superquadric = SuperQuadric(alpha[i], beta[j], scale)
 #         x,y,z = superquadric.visualize()
 #         fig.add_trace(
@@ -94,7 +87,7 @@ def comp_superquadric(points, scale, eps):
 #                 z=z.flatten(), 
 #                 alphahull= 0, 
 #                 color=next(palette), 
-#                 opacity=0.70,
+#                 opacity=1.0,
 #                 showscale= False),
 #                 row = i+1,
 #                 col = j+1)
@@ -113,14 +106,17 @@ def comp_superquadric(points, scale, eps):
 #     title_text='3D subplots with different colorscales',
 #     height=1200,
 #     width=1200)
-
+# fig.write_image("superquadric_shapes.png")
 # fig.show()
 
 
 
-alpha = 1
-beta = 0.1
-scale = np.array([1,1,1])
+eps1 = 0.1
+eps2 = 0.1
+
+alpha = eps1
+beta = eps2
+scale = np.array([4,1,2])
 
 fig = go.Figure()
 superquadric = SuperQuadric(alpha, beta, scale)
@@ -133,23 +129,13 @@ fig.add_trace(
         y=y.flatten(), 
         z=z.flatten(), 
         alphahull= 0, 
-        color=next(palette), 
-        opacity=0.70,
+        color="grey", 
+        opacity=1.0,
         showscale= False))
 
-# fig.update_yaxes(secondary_y=False, showgrid=False)
-# fig.update_yaxes(secondary_y=True, showgrid=False)
-# fig.update_scenes(
-#     xaxis_visible=False, 
-#     yaxis_visible=False,
-#     zaxis_visible=False,
-# )
-
-# fig.update_layout(
-#     plot_bgcolor="white",
-#     paper_bgcolor="white",
-#     title_text='3D subplots with different colorscales',
-#     height=1200,
-#     width=1200)
-
+fig.update_scenes(
+    xaxis_visible=False, 
+    yaxis_visible=False,
+    zaxis_visible=False,
+)
 fig.show()

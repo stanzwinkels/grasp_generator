@@ -9,7 +9,6 @@ import numpy as np
 
 from grasp_generator.tools_superquadric.multi_superquadric_generation import hierarchical_ems
 
-
 def multiquadric(points):
     pointcloud = []
     for point in points.pointcloud:
@@ -30,10 +29,8 @@ def multiquadric(points):
         )
     return QuadricDetectResponse(value_quadrics)
 
-
 def multi_quadric_sever():
     s = rospy.Service("multiquadric_server", QuadricDetect, multiquadric)
-
 
 if __name__ == "__main__":
     rospy.init_node("multiquadric_server")

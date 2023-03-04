@@ -23,9 +23,9 @@
     
 
 
-    <!-- http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#RequiresAffordance -->
+    <!-- http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#requiresAffordance -->
 
-    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#RequiresAffordance"/>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#requiresAffordance"/>
     
 
 
@@ -108,13 +108,13 @@
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#Task"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#RequiresAffordance"/>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#requiresAffordance"/>
                 <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#AffordContain"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#RequiresAffordance"/>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#requiresAffordance"/>
                 <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#AffordGrasp"/>
             </owl:Restriction>
         </rdfs:subClassOf>
@@ -134,13 +134,13 @@
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#Task"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#RequiresAffordance"/>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#requiresAffordance"/>
                 <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#AffordGrasp"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#RequiresAffordance"/>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#requiresAffordance"/>
                 <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#AffordPound"/>
             </owl:Restriction>
         </rdfs:subClassOf>
@@ -160,7 +160,7 @@
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#Task"/>
         <owl:disjointWith>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#RequiresAffordance"/>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#requiresAffordance"/>
                 <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#AffordWgrasp"/>
             </owl:Restriction>
         </owl:disjointWith>
@@ -174,13 +174,13 @@
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#Task"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#RequiresAffordance"/>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#requiresAffordance"/>
                 <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#AffordContain"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#RequiresAffordance"/>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#requiresAffordance"/>
                 <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#AffordWgrasp"/>
             </owl:Restriction>
         </rdfs:subClassOf>
@@ -200,13 +200,13 @@
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#Task"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#RequiresAffordance"/>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#requiresAffordance"/>
                 <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#AffordGrasp"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#RequiresAffordance"/>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#requiresAffordance"/>
                 <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#AffordScoop"/>
             </owl:Restriction>
         </rdfs:subClassOf>
@@ -232,13 +232,13 @@
         <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#Task"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#RequiresAffordance"/>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#requiresAffordance"/>
                 <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#AffordGrasp"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#RequiresAffordance"/>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#requiresAffordance"/>
                 <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/stanz/ontologies/2022/11/affordance-ont#AffordSupport"/>
             </owl:Restriction>
         </rdfs:subClassOf>

@@ -41,14 +41,6 @@ class GraspActionClass(object):
         self._as = actionlib.SimpleActionServer(self._action_name, GraspAction, execute_cb=self.as_cb, auto_start = False)
         self._as.start()
 
-        # Initialize grocery store collision object server clients
-        # rospy.wait_for_service('add_collision_object', timeout=2)
-        # rospy.wait_for_service('remove_collision_object', timeout=2)
-        # rospy.wait_for_service('get_grasp_pose', timeout=2)
-        # self._add_co = rospy.ServiceProxy('add_collision_object', addCollObjByAruco)
-        # self._remove_co = rospy.ServiceProxy('remove_collision_object', removeCollObj)
-        # self._get_grasp_pose = rospy.ServiceProxy('get_grasp_pose', getGraspPose)
-        
         # Moveit interfaces
         self._scene = moveit_commander.PlanningSceneInterface()
         self._group = moveit_commander.MoveGroupCommander("arm_right_torso")
@@ -80,7 +72,7 @@ class GraspActionClass(object):
         coll_obj.primitives.append(box)
 
         cube_pose = Pose()
-        cube_pose.position.x = 1.1
+        cube_pose.position.x = 1.3
         cube_pose.position.y = 0.0
         cube_pose.position.z = 0.37
         cube_pose.orientation.w = 1.0
@@ -101,8 +93,6 @@ class GraspActionClass(object):
         new_grasp.pose.position.x += vector[0] 
         new_grasp.pose.position.y += vector[1]
         new_grasp.pose.position.z += vector[2]
-        pdb.set_trace()
-
 
         # 1. Go to prior position
         if self._side == "right": 
@@ -121,34 +111,15 @@ class GraspActionClass(object):
                 self._result.success=succeeded
                 return self._as.set_succeeded(self._result)
 
-        if self._side == "left": 
-            neutral_goal = PoseStamped()
-            neutral_goal.pose.position.x = 0.2
-            neutral_goal.pose.position.y = 0.3
-            neutral_goal.pose.position.z = 1.2
-            neutral_goal.pose.orientation.x = 0
-            neutral_goal.pose.orientation.y = 0
-            neutral_goal.pose.orientation.z = 0
-            neutral_goal.pose.orientation.w = 0
-            neutral_goal.header.frame_id = "base_footprint"
-            self._group.set_pose_target(neutral_goal)
-            succeeded = self._group.go(wait=True)
-            if not succeeded:
-                self._result.success=succeeded
-                return self._as.set_succeeded(self._result)
-
-
-
-        pdb.set_trace()
-        visualize_grasp(goal.pose, "base_footprint", "final_grasp_base")       
+        visualize_grasp(goal.pose, "base_footprint", "pre_grasp_pose")
+        visualize_grasp(new_grasp.pose, "base_footprint", "grasp_pose")  
+       
         self._group.set_pose_target(goal)
         succeeded = False
         while succeeded == False: 
             succeeded = self._group.go(wait=True)
             print(succeeded)
 
-        pdb.set_trace()
-        visualize_grasp(new_grasp.pose, "base_footprint", "final_grasp_base_after")  
         self._group.set_pose_target(new_grasp)
         succeeded = False
         while succeeded == False: 

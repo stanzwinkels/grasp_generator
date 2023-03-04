@@ -73,7 +73,8 @@ def objective(trial, pointclouds, dimensions, distances):
     Sigma = 0.3                                                                         # 0.3 initial sigma^2 (default: 0 - auto generate)
     MaxiSwitch = trial.suggest_int("MaxiSwitch", 1, 4, step=1)                          # maximum number of switches allowed (default: 2)
     AdaptiveUpperBound = trial.suggest_categorical("AdaptiveUpperBound", [True, False])
-    Rescale = trial.suggest_categorical("Rescale", [True, False])                                                                      # normalize the input point cloud (default: true)
+    # Rescale = trial.suggest_categorical("Rescale", [True, False])                                                                      # normalize the input point cloud (default: true)
+    Rescale = False                                                                     # normalize the input point cloud (default: true)
     MaxLayer = trial.suggest_int('MaxLayer', 0, 4, step=1)                                                                       # maximum depth
     Eps = trial.suggest_float('Eps',0.001, 0.1)                                         # 0.03 IMPORTANT: varies based on the size of the input pointcoud (DBScan parameter)
     MinPoints = trial.suggest_int('MinPoints', 50, 500, step=50)                       # DBScan parameter required minimum points
@@ -219,14 +220,14 @@ if __name__ == "__main__":
             dimensions.append(dimension)
             distances.append(distance_cam)
 
-            visualize_pointclouds(partial_pointcloud)
+            # visualize_pointclouds(partial_pointcloud)
     dimensions = np.array(dimensions)/2
 
     print("INITIAL DIMENSIONS", dimensions)
     print("INITIAL DISTANCES", distances)
     study = optuna.create_study(direction="minimize")
     study.optimize(lambda trial: objective(trial, pointclouds, dimensions, distances),
-            n_trials=20)
+            n_trials=100)
 
     study_id = study._study_id
     best_params = study.best_params
@@ -244,6 +245,6 @@ if __name__ == "__main__":
         t = time.localtime()
         timestamp = time.strftime('%b-%d-%Y_%H%M%S', t)
 
-        plotly.offline.plot(fig_opt, filename= directory_fig+timestamp +"_optimization.html", auto_open = False)
-        plotly.offline.plot(fig_par, filename= directory_fig+timestamp +"_parallel_coordinates.html", auto_open = False)
-        joblib.dump(study, directory_fig+timestamp+"study_parameter_tuning.pkl")
+        plotly.offline.plot(fig_opt, filename= directory_fig+timestamp +"_optimization_real.html", auto_open = False)
+        plotly.offline.plot(fig_par, filename= directory_fig+timestamp +"_parallel_coordinates_real.html", auto_open = False)
+        joblib.dump(study, directory_fig+timestamp+"study_parameter_tuning_real.pkl")

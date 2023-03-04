@@ -6,6 +6,10 @@ import numpy as np
 from grasp_generator.tools_superquadric.single_superquadric_generation import EMS_recovery
 from sklearn.cluster import DBSCAN
 
+import pdb
+
+import pandas as pd
+
 def hierarchical_ems(
     point,
     OutlierRatio=rospy.get_param('hierachical_ems/OutlierRatio'),               # prior outlier probability [0, 1) (default: 0.1)
@@ -31,6 +35,9 @@ def hierarchical_ems(
     quadric_count = 1
 
 
+    points_input = []
+    points_outlier = []
+
     for h in range(MaxLayer):           # number of iterations.
         if quadric_count > Max_superquadrics:
             return list_quadrics
@@ -51,6 +58,10 @@ def hierarchical_ems(
                 AdaptiveUpperBound,
                 Rescale,
             )
+
+            points_input.append(point_seg[h][c][p_raw > 0.1, :])
+            points_outlier.append(point_seg[h][c][p_raw < 0.1, :])
+
             point_previous = point_seg[h][c]
             list_quadrics.append(x_raw)
             outlier = point_seg[h][c][p_raw < 0.1, :]
@@ -65,4 +76,22 @@ def hierarchical_ems(
                 point_outlier[h].append(outlier[clustering.labels_ == -1])
             else:
                 point_outlier[h].append(outlier)
+
+    # points_input = np.array(points_input)
+    # points_outlier = np.array(points_outlier)
+    # input_pd1 = pd.DataFrame(points_input[0])
+    # input_pd2 = pd.DataFrame(points_input[1])
+    # input_pd3 = pd.DataFrame(points_input[2])
+
+    # output_pd1 = pd.DataFrame(points_outlier[0])
+    # output_pd2 = pd.DataFrame(points_outlier[1])
+    # output_pd3 = pd.DataFrame(points_outlier[2])
+
+    # input_pd1.to_csv('input_points1.csv',index=False,header=False)  # save as csv file
+    # input_pd2.to_csv('input_points2.csv',index=False,header=False)  # save as csv file
+    # input_pd3.to_csv('input_points3.csv',index=False,header=False)  # save as csv file
+
+    # output_pd1.to_csv('output_points1.csv',index=False,header=False)  # save as csv file
+    # output_pd2.to_csv('output_points2.csv',index=False,header=False)  # save as csv file
+    # output_pd3.to_csv('output_points3.csv',index=False,header=False)  # save as csv file
     return list_quadrics
