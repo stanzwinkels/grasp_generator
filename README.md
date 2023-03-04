@@ -52,23 +52,40 @@ source /opt/ros/melodic/setup.zsh
 source ~/<install_folder>/devel/setup.zsh
 ```
 
-There are two worlds available: ```thesis_stan``` or ```krr```. The standard is set for ```thesis_stan```
-
-2. Activate mongod service:
+2. Activate mongoDB service:
 ```
-sudo activate mongod start
-sudo activate mongod status
+sudo service mongod start
 ```
 
-3. Launch all the world and all server: 
-```roslaunch grasp_generator grasp_world.launch```
-
-4. To run the script, select a desired method: 
-   ```
-   rosrun grasp_generator start.py
-   rosrun grasp_generator simulation_methodX.py 
-   ```
+3. Launch all servers. This launch file launches knowrob, GPD, rosprolog, and the additional servers.  
+```
+roslaunch grasp_generator grasp_world.launch
+```
 
 
-## 3) Examples
-![tiago](videos/top_grasp_tiago%20(online-video-cutter.com).gif)
+
+4. Before running the script, the user should manually add a table and place an object in front of TIAGo, as shown below:
+
+![alt text](readme_illustrations/tiago.png)
+
+5. To make tiago perform an action run for reasoning version-1: 
+```
+rosrun grasp_generator SPaRGE_version1.py
+```
+or for reasoning version-2:
+```
+rosrun grasp_generator SPaRGE_version2.py
+```
+
+
+
+# 3) Other experiments
+Other experiments can be found in the following files: 
+
+```
+data_generation.py                     Generation dataset partial object point clouds
+data_generation_semantics.py           Generation dataset primitive shapes
+shape_classification.ipynb             Training machine learning models primitive shapes
+shape_optimalisation.py                Hyperparameter tuning superquadric algorithm 
+shape_optimalisation_real_object.py    Hyperparameter tuning superquadric algorithm real world
+```
