@@ -1,7 +1,5 @@
 # Grasp generator
 
-:warning: **This repository is still under development! Using is at own risk**
-
 This readme file contains the final work of S. Zwinkels. It requires some additional third party packages. The code forms a block into a bigger pipeline to grasp complex products in different orientations.
 
 
