@@ -64,8 +64,8 @@ roslaunch grasp_generator grasp_world.launch
 
 4. Before running the script, the user should manually add a table and place an object in front of TIAGo, as shown below:
 
-<!-- ![alt text](readme_illustrations/tiago.png)
- -->
+![alt text](readme_illustrations/tiago.png)
+
  
 5. To make tiago perform an action run for reasoning version-1: 
 ```
